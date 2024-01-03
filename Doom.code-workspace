@@ -1,0 +1,883 @@
+{
+	"folders": [
+		{
+			"name": "Doom",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "D:\\Epic Games\\UE_5.3"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"npm.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Doom Win64 Debug Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom Win64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Debug Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 DebugGame Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom Win64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Development Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Development Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom Win64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Development Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Test Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Test",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Test Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Test",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom Win64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Test Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Test",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Shipping Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Shipping",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Shipping",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom Win64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom Win64 Shipping Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"Win64",
+					"Shipping",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Debug Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Debug Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom IOS Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Debug Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS DebugGame Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom IOS DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS DebugGame Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Development Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Development Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom IOS Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Development Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Test Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Test",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Test Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Test",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom IOS Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Test Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Test",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Shipping Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Shipping",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Shipping Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Shipping",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"Doom IOS Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "Doom IOS Shipping Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"Doom",
+					"IOS",
+					"Shipping",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 Debug Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"DoomEditor Win64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 Debug Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"Debug",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 DebugGame Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"DoomEditor Win64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"DebugGame",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 Development Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 Development Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"DoomEditor Win64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "DoomEditor Win64 Development Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"DoomEditor",
+					"Win64",
+					"Development",
+					"D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "D:\\Epic Games\\UE_5.3"
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch Doom (Debug)",
+				"request": "launch",
+				"program": "D:\\Unreal Projects\\Doom\\Binaries\\Win64\\UnrealGame-Win64-Debug.exe",
+				"preLaunchTask": "Doom Win64 Debug Build",
+				"args": [
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch Doom (DebugGame)",
+				"request": "launch",
+				"program": "D:\\Unreal Projects\\Doom\\Binaries\\Win64\\UnrealGame-Win64-DebugGame.exe",
+				"preLaunchTask": "Doom Win64 DebugGame Build",
+				"args": [
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch Doom (Development)",
+				"request": "launch",
+				"program": "D:\\Unreal Projects\\Doom\\Binaries\\Win64\\UnrealGame.exe",
+				"preLaunchTask": "Doom Win64 Development Build",
+				"args": [
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch Doom (Test)",
+				"request": "launch",
+				"program": "D:\\Unreal Projects\\Doom\\Binaries\\Win64\\UnrealGame-Win64-Test.exe",
+				"preLaunchTask": "Doom Win64 Test Build",
+				"args": [
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch Doom (Shipping)",
+				"request": "launch",
+				"program": "D:\\Unreal Projects\\Doom\\Binaries\\Win64\\UnrealGame-Win64-Shipping.exe",
+				"preLaunchTask": "Doom Win64 Shipping Build",
+				"args": [
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch DoomEditor (Debug)",
+				"request": "launch",
+				"program": "D:\\Epic Games\\UE_5.3\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-Debug.exe",
+				"preLaunchTask": "DoomEditor Win64 Debug Build",
+				"args": [
+					"D:\\Unreal Projects\\Doom\\Doom.uproject"
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch DoomEditor (DebugGame)",
+				"request": "launch",
+				"program": "D:\\Epic Games\\UE_5.3\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-DebugGame.exe",
+				"preLaunchTask": "DoomEditor Win64 DebugGame Build",
+				"args": [
+					"D:\\Unreal Projects\\Doom\\Doom.uproject"
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch DoomEditor (Development)",
+				"request": "launch",
+				"program": "D:\\Epic Games\\UE_5.3\\Engine\\Binaries\\Win64\\UnrealEditor.exe",
+				"preLaunchTask": "DoomEditor Win64 Development Build",
+				"args": [
+					"D:\\Unreal Projects\\Doom\\Doom.uproject"
+				],
+				"cwd": "D:\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "D:\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "D:\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Generate Project Files",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "UnrealBuildTool Win64 Development Build",
+				"program": "D:\\Epic Games\\UE_5.3\\Engine\\Build\\BatchFiles\\RunUBT.bat",
+				"args": [
+					"-projectfiles",
+					"-vscode",
+					"-project=D:\\Unreal Projects\\Doom\\Doom.uproject",
+					"-game",
+					"-engine",
+					"-dotnet"
+				],
+				"console": "externalTerminal",
+				"stopAtEntry": false,
+				"cwd": "D:\\Epic Games\\UE_5.3"
+			}
+		]
+	}
+}
