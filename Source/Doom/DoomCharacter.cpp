@@ -13,6 +13,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Components/ChildActorComponent.h"
 #include "BaseWeapon.h"
+#include "Components/TimelineComponent.h"
 
 
 
@@ -40,7 +41,8 @@ ADoomCharacter::ADoomCharacter()
 	WeaponChildActorComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponChildActor"));
 	WeaponChildActorComponent->SetupAttachment(FirstPersonCameraComponent);
 
-	//Assign Main Weapon
+	//Create Weapon Bob Timeline
+	WeaponBobTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("WeaponBobTimeline"));
 	
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
@@ -79,6 +81,21 @@ void ADoomCharacter::BeginPlay()
 		}
 	}
 
+	//Weapon Bob Timeline binding
+	
+	//Handle Update pin in timeline blueprint
+	FOnTimelineFloat WeaponBobMovementValue;
+	WeaponBobMovementValue.BindUFunction(this, FName("WeaponbobTimelineProgress"));
+	if (WeaponBobMovementCurve) {
+		WeaponBobTimeline->AddInterpFloat(WeaponBobMovementCurve, WeaponBobMovementValue);
+	}
+	WeaponBobTimeline->SetLooping(true);
+	WeaponBobTimeline->PlayFromStart();
+
+	//Handle Finished pin in timeline blueprint
+	//FOnTimelineEvent WeaponBobTimelineFinishedEvent;
+	//WeaponBobTimelineFinishedEvent.BindUFunction(this, FName("WeaponbobTimelineFinished"));
+	//WeaponBobTimeline->SetTimelineFinishedFunc(WeaponBobTimelineFinishedEvent);
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -143,6 +160,7 @@ void ADoomCharacter::Shoot(const FInputActionValue& Value) {
 
 	mainWeapon->FireWeapon();
 	isShooting = true;
+	ShouldBob = false;
 
 	FTimerHandle ShootMeleeHandle;
 	GetWorld()->GetTimerManager().SetTimer(ShootMeleeHandle, [&]()
@@ -155,7 +173,7 @@ void ADoomCharacter::Shoot(const FInputActionValue& Value) {
 void ADoomCharacter::StopShoot(const FInputActionValue& Value) {
 	
 	mainWeapon->StopFire();
-
+	ShouldBob = true;
 }
 
 void ADoomCharacter::Melee(const FInputActionValue& Value) {
@@ -189,3 +207,20 @@ void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
 	canMelee = true;
 }
 
+
+
+//Weapon Bob
+void ADoomCharacter::WeaponBobTimelineProgress(float Alpha){
+	if (!ShouldBob) return;
+
+	//Horizontal bobing range
+	FVector AValue = WeaponChildActorComponent->GetRelativeLocation() + FVector(0,0.02f,0);
+	FVector BValue = WeaponChildActorComponent->GetRelativeLocation() + FVector(0,-0.02f,0);
+
+	FVector newLocation = FMath::Lerp(AValue, BValue, Alpha);
+	WeaponChildActorComponent->SetRelativeLocation(newLocation);
+}
+
+// void ADoomCharacter::WeaponBobTimelineFinished(){
+
+// }

@@ -14,6 +14,8 @@ class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
 
+class UTimelineComponent;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
@@ -203,9 +205,30 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void setCanMelee(bool newVal)  {canMelee = newVal;}
 
-
 	//Weapon Pickup
 	UFUNCTION()
 	void pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass);
+
+
+//Weapon Bob
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponBob", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* WeaponBobMovementCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponBob", meta = (AllowPrivateAccess = "true"))
+	bool ShouldBob = true;
+
+	UTimelineComponent* WeaponBobTimeline;
+
+	UFUNCTION()
+	void WeaponBobTimelineProgress(float Alpha);
+
+	// UFUNCTION()
+	// void WeaponBobTimelineFinished();
+
+
+
+
 };
 
