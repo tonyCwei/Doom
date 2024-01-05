@@ -11,9 +11,9 @@ void APistol::FireWeapon() {
 
         //control fire rate
         FTimerHandle PistolTimerHandle;
-	    GetWorld()->GetTimerManager().SetTimer(PistolTimerHandle, [&]()
-	    {
-	    bFireOnce = true;
-	    }, fireRate, false);  
+        GetWorld()->GetTimerManager().SetTimer(PistolTimerHandle, [&]()
+        {
+                bFireOnce = true;
+        }, fireRate, false);
     } 
 }

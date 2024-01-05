@@ -17,6 +17,7 @@
 
 
 
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,9 @@ ADoomCharacter::ADoomCharacter()
 	//Create Weapon Bob Timeline
 	WeaponBobTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("WeaponBobTimeline"));
 	
+	//Create Weapon Swap Timeline
+	WeaponSwapTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("WeaponSwapTimeline"));
+	WeaponSwapResetTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("WeaponSwapResetTimeline"));
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	// Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
@@ -69,9 +73,14 @@ void ADoomCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+	
+	//Weapon Inventory
+
+
 
 	//Assign Main Weapon
 	mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
+	WeaponChildActorLocation = WeaponChildActorComponent->GetRelativeLocation();
 
 	//Player HUD
 	if (playerHUDClass) {
@@ -81,21 +90,62 @@ void ADoomCharacter::BeginPlay()
 		}
 	}
 
-	//Weapon Bob Timeline binding
+	/*Weapon Bob Timeline binding*/
 	
-	//Handle Update pin in timeline blueprint
-	FOnTimelineFloat WeaponBobMovementValue;
-	WeaponBobMovementValue.BindUFunction(this, FName("WeaponbobTimelineProgress"));
-	if (WeaponBobMovementCurve) {
-		WeaponBobTimeline->AddInterpFloat(WeaponBobMovementCurve, WeaponBobMovementValue);
+	//Handle Update pin in timeline blueprint, binding multiple curves to a single timeline
+	FOnTimelineFloat WeaponBobMovementValueH;
+	FOnTimelineFloat WeaponBobMovementValueV;
+
+	//Event for Update pin 
+	FOnTimelineEvent WeaponBobTimelineTickEvent;
+
+	WeaponBobTimelineTickEvent.BindUFunction(this, FName("WeaponbobTimelineProgress"));
+
+	if (WeaponBobMovementCurveH && WeaponBobMovementCurveV) {
+		WeaponBobTimeline->AddInterpFloat(WeaponBobMovementCurveH, WeaponBobMovementValueH);
+		WeaponBobTimeline->AddInterpFloat(WeaponBobMovementCurveV, WeaponBobMovementValueV);
 	}
+	WeaponBobTimeline->SetTimelinePostUpdateFunc(WeaponBobTimelineTickEvent);
+	WeaponBobTimeline->SetTimelineLength(2);
 	WeaponBobTimeline->SetLooping(true);
-	WeaponBobTimeline->PlayFromStart();
+	
 
 	//Handle Finished pin in timeline blueprint
 	//FOnTimelineEvent WeaponBobTimelineFinishedEvent;
 	//WeaponBobTimelineFinishedEvent.BindUFunction(this, FName("WeaponbobTimelineFinished"));
 	//WeaponBobTimeline->SetTimelineFinishedFunc(WeaponBobTimelineFinishedEvent);
+
+	/*Weapon Swap Timeline Binding*/
+	WeaponSwapTimeline->SetTimelineLength(0.5);
+	WeaponSwapResetTimeline->SetTimelineLength(0.5);
+
+
+	FOnTimelineFloat WeaponSwapMovementValue;
+	WeaponSwapMovementValue.BindUFunction(this, FName("WeaponSwapTimelineProgress"));
+	if (WeaponSwapCurve) {
+		WeaponSwapTimeline->AddInterpFloat(WeaponSwapCurve, WeaponSwapMovementValue);
+	}
+	FOnTimelineEvent WeaponSwapTimelineFinishedEvent;
+	WeaponSwapTimelineFinishedEvent.BindUFunction(this, FName("WeaponSwapTimelineFinished"));
+	WeaponSwapTimeline->SetTimelineFinishedFunc(WeaponSwapTimelineFinishedEvent);
+
+	FOnTimelineFloat WeaponSwapResetMovementValue;
+	WeaponSwapResetMovementValue.BindUFunction(this, FName("WeaponSwapResetTimelineProgress"));
+	if (WeaponSwapCurve) {
+		WeaponSwapResetTimeline->AddInterpFloat(WeaponSwapCurve, WeaponSwapResetMovementValue);
+	}
+	FOnTimelineEvent WeaponSwapResetTimelineFinishedEvent;
+	WeaponSwapResetTimelineFinishedEvent.BindUFunction(this, FName("WeaponSwapResetTimelineFinished"));
+	WeaponSwapResetTimeline->SetTimelineFinishedFunc(WeaponSwapResetTimelineFinishedEvent);
+	
+
+}
+
+void ADoomCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	//UE_LOG(LogTemp, Display, TEXT("%f"), GetVelocity().Size());
+	WeaponBob(DeltaTime);
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -121,6 +171,14 @@ void ADoomCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		//Melee
 		EnhancedInputComponent->BindAction(MeleeAction, ETriggerEvent::Started, this, &ADoomCharacter::Melee);
+
+		//Weapon Swap
+		EnhancedInputComponent->BindAction(Weapon1Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon1);
+		EnhancedInputComponent->BindAction(Weapon2Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon2);
+		EnhancedInputComponent->BindAction(Weapon3Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon3);
+		EnhancedInputComponent->BindAction(Weapon4Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon4);
+		EnhancedInputComponent->BindAction(Weapon5Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon5);
+		EnhancedInputComponent->BindAction(Weapon6Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon6);
 	}
 	else
 	{
@@ -156,11 +214,12 @@ void ADoomCharacter::Look(const FInputActionValue& Value)
 }
 
 void ADoomCharacter::Shoot(const FInputActionValue& Value) {
-	if (!canMelee) return;
+	if (!canMelee || IsSwapping) return;
 
 	mainWeapon->FireWeapon();
 	isShooting = true;
 	ShouldBob = false;
+	WeaponChildActorComponent->SetRelativeLocation(WeaponChildActorLocation);
 
 	FTimerHandle ShootMeleeHandle;
 	GetWorld()->GetTimerManager().SetTimer(ShootMeleeHandle, [&]()
@@ -177,7 +236,7 @@ void ADoomCharacter::StopShoot(const FInputActionValue& Value) {
 }
 
 void ADoomCharacter::Melee(const FInputActionValue& Value) {
-	if (!canMelee || isShooting) return;
+	if (!canMelee || isShooting || IsSwapping) return;
 
 	canMelee = false;
 	curWeaponClass = WeaponChildActorComponent->GetChildActorClass();
@@ -202,24 +261,162 @@ void ADoomCharacter::Melee(const FInputActionValue& Value) {
 
 void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
 	WeaponChildActorComponent->SetChildActorClass(WeaponClass);
+	AllWeapons.Add(WeaponClass);
 	mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
+
 	GetWorldTimerManager().ClearTimer(MeleeHandle);
 	canMelee = true;
+}
+
+bool ADoomCharacter::IsMoving() const
+{
+	return GetVelocity().Size() > 0;
 }
 
 
 
 //Weapon Bob
-void ADoomCharacter::WeaponBobTimelineProgress(float Alpha){
-	if (!ShouldBob) return;
+void ADoomCharacter::WeaponBobTimelineProgress(){
+	WeaponBobTimelineUpdate(
+		WeaponBobMovementCurveH->GetFloatValue(WeaponBobTimeline->GetPlaybackPosition()),
+		WeaponBobMovementCurveV->GetFloatValue(WeaponBobTimeline->GetPlaybackPosition())
+	);
+
+}
+
+void ADoomCharacter::WeaponBobTimelineUpdate(float HValue, float VValue)
+{
+
+	float curX = WeaponChildActorComponent->GetRelativeLocation().X;
 
 	//Horizontal bobing range
-	FVector AValue = WeaponChildActorComponent->GetRelativeLocation() + FVector(0,0.02f,0);
-	FVector BValue = WeaponChildActorComponent->GetRelativeLocation() + FVector(0,-0.02f,0);
+	float YAValue = WeaponChildActorComponent->GetRelativeLocation().Y + 0.02;
+	float YBValue = WeaponChildActorComponent->GetRelativeLocation().Y - 0.02;
+	float newY = FMath::Lerp(YAValue, YBValue, HValue);
+	//Vetical Bobing range
+	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z + 0.01;
+	float ZBValue = WeaponChildActorComponent->GetRelativeLocation().Z - 0.01;
+	float newZ = FMath::Lerp(ZAValue, ZBValue, VValue);
 
-	FVector newLocation = FMath::Lerp(AValue, BValue, Alpha);
-	WeaponChildActorComponent->SetRelativeLocation(newLocation);
+	WeaponChildActorComponent->SetRelativeLocation(FVector(curX, newY, newZ));
 }
+
+
+
+void ADoomCharacter::WeaponBob(float DeltaTime)
+{
+	if (IsMoving() && ShouldBob && !IsSwapping) {
+		WeaponBobTimeline->Play();
+	}
+	else {
+		WeaponBobTimeline->Stop();
+		FVector newWeaponLocation = FMath::VInterpConstantTo(
+			WeaponChildActorComponent->GetRelativeLocation(),
+			WeaponChildActorLocation,
+			DeltaTime,
+			25
+		);
+		WeaponChildActorComponent->SetRelativeLocation(newWeaponLocation);
+	}
+	
+}
+
+
+//Weapon Swap
+void ADoomCharacter::WeaponSwap(int32 WeaponIndex)
+{
+
+	//bool SameWeapon = AllWeapons[WeaponIndex] == WeaponChildActorComponent->GetChildActorClass();
+	bool NoWeapon = WeaponIndex > AllWeapons.Num() - 1;
+	if ( NoWeapon ||
+		IsSwapping ||
+		AllWeapons[WeaponIndex] == WeaponChildActorComponent->GetChildActorClass()//Same Weapon
+		) 
+	{
+		UE_LOG(LogTemp, Display, TEXT("No Weapon"));
+		return;
+	}
+
+
+	IsSwapping = true;
+	WeaponSwapTimeline->PlayFromStart();
+	SwapIndex = WeaponIndex;
+}
+
+void ADoomCharacter::SwapWeapon1(const FInputActionValue& Value)
+{
+	WeaponSwap(1);
+}
+
+void ADoomCharacter::SwapWeapon2(const FInputActionValue& Value)
+{
+	WeaponSwap(2);
+}
+
+void ADoomCharacter::SwapWeapon3(const FInputActionValue& Value)
+{
+	WeaponSwap(3);
+}
+
+void ADoomCharacter::SwapWeapon4(const FInputActionValue& Value)
+{
+	WeaponSwap(4);
+}
+
+void ADoomCharacter::SwapWeapon5(const FInputActionValue& Value)
+{
+	WeaponSwap(5);
+}
+
+void ADoomCharacter::SwapWeapon6(const FInputActionValue& Value)
+{
+	WeaponSwap(6);
+}
+
+void ADoomCharacter::WeaponSwapTimelineProgress(float Alpha)
+{
+	float curX = WeaponChildActorComponent->GetRelativeLocation().X;
+	float curY = WeaponChildActorComponent->GetRelativeLocation().Y;
+	
+	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z;
+	float ZBValue = WeaponChildActorComponent->GetRelativeLocation().Z - 0.8;
+	float newZ = FMath::Lerp(ZAValue, ZBValue, Alpha);
+
+	WeaponChildActorComponent->SetRelativeLocation(FVector(curX, curY, newZ));
+
+}
+
+void ADoomCharacter::WeaponSwapTimelineFinished()
+{
+	/*UE_LOG(LogTemp, Display, TEXT("WeaponSwapTimelineFinished"));*/
+	WeaponChildActorComponent->SetChildActorClass(AllWeapons[SwapIndex]);
+	mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
+	WeaponSwapResetTimeline->PlayFromStart();
+
+	
+}
+
+void ADoomCharacter::WeaponSwapResetTimelineProgress(float Alpha)
+{
+	float curX = WeaponChildActorComponent->GetRelativeLocation().X;
+	float curY = WeaponChildActorComponent->GetRelativeLocation().Y;
+
+	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z;
+	float ZBValue = WeaponChildActorLocation.Z;
+	float newZ = FMath::Lerp(ZAValue, ZBValue, Alpha);
+
+	WeaponChildActorComponent->SetRelativeLocation(FVector(curX, curY, newZ));
+}
+
+void ADoomCharacter::WeaponSwapResetTimelineFinished()
+{
+	IsSwapping = false;
+}
+
+
+
+
+
 
 // void ADoomCharacter::WeaponBobTimelineFinished(){
 

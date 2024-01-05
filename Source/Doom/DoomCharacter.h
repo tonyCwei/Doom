@@ -58,6 +58,8 @@ protected:
 	virtual void BeginPlay();
 
 public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 		
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -94,6 +96,8 @@ private:
 	//Weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	class UChildActorComponent* WeaponChildActorComponent;	
+
+	FVector WeaponChildActorLocation;
 	
 	UPROPERTY(VisibleAnywhere)
 	class ABaseWeapon* mainWeapon;
@@ -106,14 +110,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Melee", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABaseWeapon> curWeaponClass;
 
+	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Melee", meta = (AllowPrivateAccess = "true"))
 	float meleeRate = 0.5f;
 
 	bool canMelee = true;
 
 	FTimerHandle MeleeHandle;
-
-
 
 	bool isShooting = false;
 
@@ -210,11 +214,20 @@ public:
 	void pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass);
 
 
+
+	//Movement
+	UFUNCTION() 
+	bool IsMoving() const;
+
+
 //Weapon Bob
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponBob", meta = (AllowPrivateAccess = "true"))
-	UCurveFloat* WeaponBobMovementCurve;
+	UCurveFloat* WeaponBobMovementCurveH;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponBob", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* WeaponBobMovementCurveV;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponBob", meta = (AllowPrivateAccess = "true"))
 	bool ShouldBob = true;
@@ -222,13 +235,83 @@ protected:
 	UTimelineComponent* WeaponBobTimeline;
 
 	UFUNCTION()
-	void WeaponBobTimelineProgress(float Alpha);
+	void WeaponBobTimelineProgress();
+
+	void WeaponBobTimelineUpdate(float HValue, float VValue);
+
+	UFUNCTION()
+	void WeaponBob(float DeltaTime);
+
 
 	// UFUNCTION()
 	// void WeaponBobTimelineFinished();
 
+//Weapon Swap
+private:
+	//Input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Weapon1Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Weapon2Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Weapon3Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Weapon4Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Weapon5Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Weapon6Action;
+
+	void SwapWeapon1(const FInputActionValue& Value);
+
+	void SwapWeapon2(const FInputActionValue& Value);
+
+	void SwapWeapon3(const FInputActionValue& Value);
+
+	void SwapWeapon4(const FInputActionValue& Value);
+
+	void SwapWeapon5(const FInputActionValue& Value);
+
+	void SwapWeapon6(const FInputActionValue& Value);
+
+	/*End of Input Setup*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSwap", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<ABaseWeapon>>  AllWeapons;
+	
+	int32 SwapIndex = 0;
+	
+	bool IsSwapping = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WeaponSwap", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* WeaponSwapCurve;
+
+	UTimelineComponent* WeaponSwapTimeline;
+
+	UFUNCTION()
+	void WeaponSwapTimelineProgress(float Alpha);
+
+	UFUNCTION()
+	void WeaponSwapTimelineFinished();
+
+	UTimelineComponent* WeaponSwapResetTimeline;
+
+	UFUNCTION()
+	void WeaponSwapResetTimelineProgress(float Alpha);
+
+	UFUNCTION()
+	void WeaponSwapResetTimelineFinished();
 
 
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void WeaponSwap(int32 WeaponIndex);
 
 };
 
