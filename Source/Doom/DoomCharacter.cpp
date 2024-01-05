@@ -14,6 +14,7 @@
 #include "Components/ChildActorComponent.h"
 #include "BaseWeapon.h"
 #include "Components/TimelineComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 
@@ -73,8 +74,6 @@ void ADoomCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
-	//Weapon Inventory
 
 
 
@@ -89,6 +88,8 @@ void ADoomCharacter::BeginPlay()
 			playerHUD->AddToViewport();
 		}
 	}
+
+	UpdateCurAmmoText();
 
 	/*Weapon Bob Timeline binding*/
 	
@@ -137,6 +138,9 @@ void ADoomCharacter::BeginPlay()
 	FOnTimelineEvent WeaponSwapResetTimelineFinishedEvent;
 	WeaponSwapResetTimelineFinishedEvent.BindUFunction(this, FName("WeaponSwapResetTimelineFinished"));
 	WeaponSwapResetTimeline->SetTimelineFinishedFunc(WeaponSwapResetTimelineFinishedEvent);
+
+	//Sprint
+	WalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	
 
 }
@@ -179,6 +183,11 @@ void ADoomCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(Weapon4Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon4);
 		EnhancedInputComponent->BindAction(Weapon5Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon5);
 		EnhancedInputComponent->BindAction(Weapon6Action, ETriggerEvent::Started, this, &ADoomCharacter::SwapWeapon6);
+
+		//Sprint
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ADoomCharacter::SprintStart);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADoomCharacter::SprintEnd);
+
 	}
 	else
 	{
@@ -259,10 +268,42 @@ void ADoomCharacter::Melee(const FInputActionValue& Value) {
 }
 
 
+void ADoomCharacter::UpdateCurAmmoText()
+{
+	switch (mainWeapon->GetAmmoType()) {
+		case Bullet:
+			playerHUD->UpdateBullet();
+			break;
+
+		case Shell:
+			playerHUD->UpdateShell();
+			break;
+
+		case Rocket:
+			playerHUD->UpdateRocket();
+			break;
+
+		case Cell:
+			playerHUD->UpdateCell();
+			break;
+
+		case MeleeWeapon:
+			playerHUD->UpdateChainsaw();
+			break;
+
+		default:
+			return;
+	}
+
+
+
+}
+
 void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
 	WeaponChildActorComponent->SetChildActorClass(WeaponClass);
 	AllWeapons.Add(WeaponClass);
 	mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
+	UpdateCurAmmoText();
 
 	GetWorldTimerManager().ClearTimer(MeleeHandle);
 	canMelee = true;
@@ -271,6 +312,16 @@ void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
 bool ADoomCharacter::IsMoving() const
 {
 	return GetVelocity().Size() > 0;
+}
+
+void ADoomCharacter::SprintStart(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void ADoomCharacter::SprintEnd(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 
@@ -333,7 +384,7 @@ void ADoomCharacter::WeaponSwap(int32 WeaponIndex)
 		AllWeapons[WeaponIndex] == WeaponChildActorComponent->GetChildActorClass()//Same Weapon
 		) 
 	{
-		UE_LOG(LogTemp, Display, TEXT("No Weapon"));
+		//UE_LOG(LogTemp, Display, TEXT("No Weapon"));
 		return;
 	}
 
@@ -391,6 +442,7 @@ void ADoomCharacter::WeaponSwapTimelineFinished()
 	/*UE_LOG(LogTemp, Display, TEXT("WeaponSwapTimelineFinished"));*/
 	WeaponChildActorComponent->SetChildActorClass(AllWeapons[SwapIndex]);
 	mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
+	UpdateCurAmmoText();
 	WeaponSwapResetTimeline->PlayFromStart();
 
 	

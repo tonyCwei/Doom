@@ -14,34 +14,41 @@ void UPlayerHUD::NativeConstruct()
     InitlizeAmmo();
 }
 
-void UPlayerHUD::InitlizeAmmo() {
-    UpdateBullet();
+void UPlayerHUD::InitlizeAmmo() { 
     maxBulletNo->SetText(FText::AsNumber(playerCharacter->getMaxBullet()));
-
-    UpdateShell();
     maxShellNo->SetText(FText::AsNumber(playerCharacter->getMaxShell()));
-
-    UpdateRocket();
-    maxRocketNo->SetText(FText::AsNumber(playerCharacter->getMaxRocket()));
-
-    UpdateCell();
+    maxRocketNo->SetText(FText::AsNumber(playerCharacter->getMaxRocket())); 
     maxCellNo->SetText(FText::AsNumber(playerCharacter->getMaxCell()));
+
+    UpdateBullet();
+    UpdateShell();
+    UpdateRocket();
+    UpdateCell();
 }
 
 void UPlayerHUD::UpdateBullet() {
     bulletNo->SetText(FText::AsNumber(playerCharacter->getBullet()));
+    CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getBullet()));
 }
 
 void UPlayerHUD::UpdateShell() {
     shellNo->SetText(FText::AsNumber(playerCharacter->getShell()));
+    CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getShell()));
 }
 
 void UPlayerHUD::UpdateRocket() {
     rocketNo->SetText(FText::AsNumber(playerCharacter->getRocket()));
+    CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getRocket()));
 }
 
 void UPlayerHUD::UpdateCell() {
     cellNo->SetText(FText::AsNumber(playerCharacter->getCell()));
+    CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getCell()));
+}
+
+void UPlayerHUD::UpdateChainsaw()
+{
+    CurrentAmmo->SetText(FText::FromString("Infinity"));
 }
 
 

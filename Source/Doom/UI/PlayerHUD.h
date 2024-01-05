@@ -9,6 +9,8 @@
 /**
  * 
  */
+class UTextBlock;
+
 UCLASS()
 class DOOM_API UPlayerHUD : public UUserWidget
 {
@@ -25,24 +27,27 @@ private:
 
 	//Ammo Text Blocks
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* bulletNo;
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* maxBulletNo;
+	UTextBlock* CurrentAmmo;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* shellNo;
+	UTextBlock* bulletNo;
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* maxShellNo;
+	UTextBlock* maxBulletNo;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* rocketNo;
+	UTextBlock* shellNo;
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* maxRocketNo;
+	UTextBlock* maxShellNo;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* cellNo;
+	UTextBlock* rocketNo;
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* maxCellNo;
+	UTextBlock* maxRocketNo;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* cellNo;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* maxCellNo;
 
 public:
 
@@ -55,6 +60,8 @@ public:
 	void UpdateRocket();
 
 	void UpdateCell();
+
+	void UpdateChainsaw();
 
 
 };

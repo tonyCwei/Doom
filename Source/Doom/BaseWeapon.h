@@ -14,7 +14,7 @@ enum Ammo {
 	Shell UMETA(DisplayName = "Shell"),
 	Rocket UMETA(DisplayName = "Rocket"),
 	Cell UMETA(DisplayName = "Cell"),
-	Melee UMETA(DisplayName = "Melee")
+	MeleeWeapon UMETA(DisplayName = "MeleeWeapon")
 };
 
 
@@ -96,5 +96,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void decreaseAmmo();
+
+	UFUNCTION()
+	Ammo GetAmmoType() { return ammoType; }
 
 };

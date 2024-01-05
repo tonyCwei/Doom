@@ -169,7 +169,7 @@ bool ABaseWeapon::hasEnoughAmmo() {
 	case Cell:
 		return playerCharacter->getCell() > 0;
 	
-	case Melee:
+	case MeleeWeapon:
 		return true;
 	
 	default:

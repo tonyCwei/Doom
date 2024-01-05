@@ -150,13 +150,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ammo", meta = (AllowPrivateAccess = "true"))
 	int32 maxCell = 300;
 
-	//Player HUD
+//Player HUD
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UPlayerHUD> playerHUDClass;
 
 	class UPlayerHUD* playerHUD;
 	
-
+	void UpdateCurAmmoText();
 
 public:
 	//Getter
@@ -218,6 +218,20 @@ public:
 	//Movement
 	UFUNCTION() 
 	bool IsMoving() const;
+
+//Sprint
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
+
+	float WalkSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sprint", meta = (AllowPrivateAccess = "true"))
+	float SprintSpeed = 1000;
+
+	void SprintStart(const FInputActionValue& Value);
+
+	void SprintEnd(const FInputActionValue& Value);
 
 
 //Weapon Bob
