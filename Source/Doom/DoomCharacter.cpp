@@ -316,12 +316,55 @@ bool ADoomCharacter::IsMoving() const
 
 void ADoomCharacter::SprintStart(const FInputActionValue& Value)
 {
+	isSprinting = true;
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	drainStamina();
 }
 
 void ADoomCharacter::SprintEnd(const FInputActionValue& Value)
 {
+	isSprinting = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	
+	GetWorldTimerManager().ClearTimer(regenTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(regenTimerHandle, [&]()
+		{
+			regenStamina();
+		}, 1, false);
+}
+
+void ADoomCharacter::drainStamina()
+{
+	stamina -= 0.5;
+	if (stamina <= 0) stamina = 0;
+
+	if (stamina == 0) {
+		SprintEnd(1);
+	}
+	else if (isSprinting) {
+		FTimerHandle sprintTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(sprintTimerHandle, [&]()
+			{
+				drainStamina();
+			}, 0.01, false);
+	}
+}
+
+void ADoomCharacter::regenStamina()
+{
+	if (isSprinting) return;
+	
+	stamina += 1;
+	if (stamina >= maxStamina) stamina = maxStamina;
+
+	if (stamina < maxStamina) {
+		FTimerHandle sprintTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(sprintTimerHandle, [&]()
+			{
+				regenStamina();
+			}, 0.01, false);
+	}
+	
 }
 
 

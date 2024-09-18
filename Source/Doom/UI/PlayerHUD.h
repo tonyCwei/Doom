@@ -20,6 +20,8 @@ public:
 	//native construct needed
 	virtual void NativeConstruct() override;
 
+protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 private:
 	//player reference
@@ -48,6 +50,12 @@ private:
 	UTextBlock* cellNo;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* maxCellNo;
+
+	//Stamina
+	UPROPERTY(meta = (BindWidget))
+	class UProgressBar* staminaProgressBar;
+
+	void updateStaminaBar();
 
 public:
 

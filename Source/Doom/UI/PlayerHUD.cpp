@@ -5,7 +5,9 @@
 #include "Doom/DoomCharacter.h"
 #include "Components/CanvasPanel.h"
 #include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 #include "Kismet/GameplayStatics.h"
+
 
 void UPlayerHUD::NativeConstruct()
 {
@@ -14,7 +16,22 @@ void UPlayerHUD::NativeConstruct()
     InitlizeAmmo();
 }
 
-void UPlayerHUD::InitlizeAmmo() { 
+void UPlayerHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
+    updateStaminaBar();
+    
+}
+
+void UPlayerHUD::updateStaminaBar()
+{
+    if (!playerCharacter)
+        return;
+
+    staminaProgressBar->SetPercent(playerCharacter->stamina / playerCharacter->maxStamina);
+}
+
+void UPlayerHUD::InitlizeAmmo() {
     maxBulletNo->SetText(FText::AsNumber(playerCharacter->getMaxBullet()));
     maxShellNo->SetText(FText::AsNumber(playerCharacter->getMaxShell()));
     maxRocketNo->SetText(FText::AsNumber(playerCharacter->getMaxRocket())); 

@@ -233,6 +233,23 @@ private:
 
 	void SprintEnd(const FInputActionValue& Value);
 
+	void drainStamina();
+
+	void regenStamina();
+
+	FTimerHandle regenTimerHandle;
+
+public:
+	bool isSprinting = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sprint", meta = (AllowPrivateAccess = "true"))
+	float stamina = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sprint", meta = (AllowPrivateAccess = "true"))
+	float maxStamina = 100;
+
+
+
 
 //Weapon Bob
 protected:

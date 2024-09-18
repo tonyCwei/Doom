@@ -18,5 +18,7 @@ public:
 
 	void FireWeapon() override;
 
+	void Punch();
+
 	
 };
