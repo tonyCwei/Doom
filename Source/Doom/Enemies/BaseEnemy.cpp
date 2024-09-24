@@ -6,6 +6,8 @@
 #include "PaperFlipbook.h"
 #include "Doom/DoomCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include <Kismet/KismetMathLibrary.h>
+#include "Doom/Projectile/BaseProjectile.h"
 
 
 
@@ -19,6 +21,8 @@ ABaseEnemy::ABaseEnemy()
 	EnemyFlipBookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("EnemyFlipBook"));
 	EnemyFlipBookComponent->SetupAttachment(RootComponent);
 	
+	ProjectileSpawn = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawn"));
+	ProjectileSpawn->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -32,6 +36,14 @@ void ABaseEnemy::BeginPlay()
 void ABaseEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (canSeePlayer) {
+		rotateToPlayer(DeltaTime);
+	}
+	else {
+		
+	}
+
 	updateDirectionalSprite();
 }
 
@@ -41,6 +53,8 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+
 
 void ABaseEnemy::updateDirectionalSprite()
 {
@@ -95,7 +109,7 @@ void ABaseEnemy::updateDirectionalSprite()
 	}
 
 
-	UE_LOG(LogTemp, Warning, TEXT("Dot Product: %f"), degrees);
+	//UE_LOG(LogTemp, Warning, TEXT("Dot Product: %f"), degrees);
 
 
 
@@ -107,3 +121,36 @@ void ABaseEnemy::updateFlipbook(float degree, int32 index)
 	EnemyFlipBookComponent->SetFlipbook(directionalFlipbooks[index]);
 }
 
+void ABaseEnemy::rotateToPlayer(float DeltaTime)
+{
+
+	
+	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), playerCharacter->GetActorLocation());
+
+	FRotator NewRotation = FMath::RInterpConstantTo(this->GetActorRotation(), TargetRotation, DeltaTime, rotationSpeed);
+
+	this->SetActorRotation(NewRotation);
+
+
+}
+
+void ABaseEnemy::ShootProjectle()
+{
+	FVector spawnLocation = ProjectileSpawn->GetComponentLocation();
+	FRotator spawnRotation = ProjectileSpawn->GetComponentRotation();
+	//FTransform SpawnTransform = LineTraceComponent->GetComponentTransform();
+
+	if (ProjectileClass) {
+		ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass, spawnLocation, spawnRotation);
+		//ABaseProjectile* Projectile = GetWorld()->SpawnActorDeferred<ABaseProjectile>(ProjectileClass, SpawnTransform);
+		if (Projectile) {
+			
+			//Projectile->projectileDamage = weaponDamage;
+			Projectile->SetOwner(this);
+			
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Empty ProjectileClass"));
+	}
+}

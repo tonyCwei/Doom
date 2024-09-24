@@ -77,9 +77,6 @@ protected:
 
 	void StopShoot(const FInputActionValue& Value);
 
-	/** Called for melee input */
-	void Melee(const FInputActionValue& Value);
-
 
 protected:
 	// APawn interface
@@ -104,6 +101,9 @@ private:
 
 
 	//Melee
+	/** Called for melee input */
+	void Melee(const FInputActionValue& Value);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Melee", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABaseWeapon> fistClass;
 
@@ -120,6 +120,8 @@ private:
 	FTimerHandle MeleeHandle;
 
 	bool isShooting = false;
+
+	
 
 //Different Types of Bullets
 	//Pistol
@@ -216,8 +218,8 @@ public:
 
 
 	//Movement
-	UFUNCTION() 
-	bool IsMoving() const;
+	UFUNCTION(BlueprintCallable)
+	bool isMoving() const;
 
 //Sprint
 private:
@@ -226,7 +228,7 @@ private:
 
 	float WalkSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sprint", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed = 1000;
 
 	void SprintStart(const FInputActionValue& Value);
@@ -242,14 +244,23 @@ private:
 public:
 	bool isSprinting = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sprint", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
 	float stamina = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sprint", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
 	float maxStamina = 100;
 
+//Dash
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
 
 
+	bool isDashing = false;
+
+	float dashCD = 1;
+
+	void Dash(const FInputActionValue& Value);
 
 //Weapon Bob
 protected:

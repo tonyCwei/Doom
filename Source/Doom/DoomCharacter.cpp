@@ -188,6 +188,9 @@ void ADoomCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ADoomCharacter::SprintStart);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADoomCharacter::SprintEnd);
 
+		//Dash
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ADoomCharacter::Dash);
+		
 	}
 	else
 	{
@@ -309,7 +312,7 @@ void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
 	canMelee = true;
 }
 
-bool ADoomCharacter::IsMoving() const
+bool ADoomCharacter::isMoving() const
 {
 	return GetVelocity().Size() > 0;
 }
@@ -352,7 +355,7 @@ void ADoomCharacter::drainStamina()
 
 void ADoomCharacter::regenStamina()
 {
-	if (isSprinting) return;
+	if (isSprinting || isDashing) return;
 	
 	stamina += 1;
 	if (stamina >= maxStamina) stamina = maxStamina;
@@ -368,6 +371,38 @@ void ADoomCharacter::regenStamina()
 }
 
 
+
+void ADoomCharacter::Dash(const FInputActionValue& Value)
+{
+	if (isDashing || stamina < 25  || !isMoving()) return;
+
+	isDashing = true;
+
+	stamina -= 25;
+	if (stamina <= 0) stamina = 0;
+
+
+	//If using base velocity without normalize, dash will not work while character switching to oppsite direction
+	FVector movingVelocity = GetVelocity();
+	movingVelocity.Normalize();
+
+	FVector LaunchVelocity(movingVelocity.X * 5000, movingVelocity.Y * 5000, 0);
+	LaunchCharacter(LaunchVelocity, false, false);
+
+
+	FTimerHandle dashTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(dashTimerHandle, [&]()
+		{
+			isDashing = false;
+		}, 0.8, false);
+
+	GetWorldTimerManager().ClearTimer(regenTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(regenTimerHandle, [&]()
+		{
+			regenStamina();
+		}, 1, false);
+
+}
 
 //Weapon Bob
 void ADoomCharacter::WeaponBobTimelineProgress(){
@@ -399,7 +434,7 @@ void ADoomCharacter::WeaponBobTimelineUpdate(float HValue, float VValue)
 
 void ADoomCharacter::WeaponBob(float DeltaTime)
 {
-	if (IsMoving() && ShouldBob && !IsSwapping) {
+	if (isMoving() && ShouldBob && !IsSwapping) {
 		WeaponBobTimeline->Play();
 	}
 	else {
