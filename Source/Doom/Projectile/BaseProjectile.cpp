@@ -57,7 +57,7 @@ void ABaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	sphereCollision->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
-	
+	//sphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
 	
 }
 
@@ -70,39 +70,36 @@ void ABaseProjectile::Tick(float DeltaTime)
 
 
 void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
-	//UE_LOG(LogTemp, Display, TEXT("%f"), projectileDamage);
-
-	//May change later
-	//AActor* MyOwner = UGameplayStatics::GetPlayerCharacter(this,0);
-	AActor* MyOwner = GetOwner();
-	if (MyOwner == nullptr) {
-		Destroy();
-		return;
-	}
-
-	//Apply Damage
-	auto MyOwnerInstigator = MyOwner->GetInstigatorController();
-	auto DamageTypeClass = UDamageType::StaticClass();
-
-	if (OtherActor && OtherActor != this && OtherActor != MyOwner) {
-		//UE_LOG(LogTemp, Display, TEXT("apply damaged called"));
-		UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
-	}
 	
+		AActor* MyOwner = GetOwner();
+		if (MyOwner == nullptr) {
+			Destroy();
+			return;
+		}
 
-	//Set flipbook and destroy, may need set scale
-	projectileFlipbookComponent->SetWorldScale3D(destroyScale);
-	projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
-	
-	//Destroy after destroyFlipbook finishes playing
-	FTimerHandle ProjectileTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
-	{
-	   Destroy();
-	}, projectileFlipbookComponent->GetFlipbookLength()*0.9, false);
-	//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
+		//Apply Damage
+		auto MyOwnerInstigator = MyOwner->GetInstigatorController();
+		auto DamageTypeClass = UDamageType::StaticClass();
 
+		if (OtherActor && OtherActor != this && OtherActor != MyOwner) {
+			UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
+		}
+
+		sphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		//Set flipbook and destroy, may need set scale
+		projectileFlipbookComponent->SetWorldScale3D(destroyScale);
+		projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
+
+		//Destroy after destroyFlipbook finishes playing
+		FTimerHandle ProjectileTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
+			{
+				Destroy();
+			}, projectileFlipbookComponent->GetFlipbookLength() * 0.9, false);
+		//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
 }
+
 
 
 

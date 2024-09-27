@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include <Kismet/KismetMathLibrary.h>
 #include "Doom/Projectile/BaseProjectile.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 
@@ -30,12 +31,17 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	playerCharacter = Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	currentFlipbooks = directionalFlipbooks;
+
+	OnTakeAnyDamage.AddDynamic(this, &ABaseEnemy::TakeDamage);
+	
 }
 
 // Called every frame
 void ABaseEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	CheckEnemyState();
 
 	if (canSeePlayer) {
 		rotateToPlayer(DeltaTime);
@@ -117,8 +123,31 @@ void ABaseEnemy::updateDirectionalSprite()
 
 void ABaseEnemy::updateFlipbook(float degree, int32 index)
 {
+	switch (enemyState)
+	{
+	case IdleState:
+		currentFlipbooks = directionalFlipbooks;
+		break;
+
+	case MovingState:
+		currentFlipbooks = movingFlipbooks;
+		break;
+
+	case MeleeAttackState:
+		currentFlipbooks = meleeAttackFlipbooks;
+		break;
+
+	case RangedAttackState:
+		currentFlipbooks = rangedAttackFlipbooks;
+		break;
+
+	default:
+		break;
+	}
+
+
 	EnemyFlipBookComponent->SetRelativeRotation(FRotator(0, degree, 0));
-	EnemyFlipBookComponent->SetFlipbook(directionalFlipbooks[index]);
+	EnemyFlipBookComponent->SetFlipbook(currentFlipbooks[index]);
 }
 
 void ABaseEnemy::rotateToPlayer(float DeltaTime)
@@ -134,23 +163,133 @@ void ABaseEnemy::rotateToPlayer(float DeltaTime)
 
 }
 
-void ABaseEnemy::ShootProjectle()
+void ABaseEnemy::CheckEnemyState()
 {
-	FVector spawnLocation = ProjectileSpawn->GetComponentLocation();
-	FRotator spawnRotation = ProjectileSpawn->GetComponentRotation();
-	//FTransform SpawnTransform = LineTraceComponent->GetComponentTransform();
+	if (GetVelocity().Size() > 0) {
+		if (isAttacking) {
+			switch (attackingstate) {
+				case MeleeAttacking:
+					enemyState = MeleeAttackState;
+					break;
 
-	if (ProjectileClass) {
-		ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass, spawnLocation, spawnRotation);
-		//ABaseProjectile* Projectile = GetWorld()->SpawnActorDeferred<ABaseProjectile>(ProjectileClass, SpawnTransform);
-		if (Projectile) {
-			
-			//Projectile->projectileDamage = weaponDamage;
-			Projectile->SetOwner(this);
-			
+				case RangedAttacking:
+					enemyState = RangedAttackState;
+					break;
+			}
+		}
+		else {
+			enemyState = MovingState;
 		}
 	}
 	else {
-		UE_LOG(LogTemp, Error, TEXT("Empty ProjectileClass"));
+		if (isAttacking) {
+			switch (attackingstate) {
+			case MeleeAttacking:
+				enemyState = MeleeAttackState;
+				break;
+
+			case RangedAttacking:
+				enemyState = RangedAttackState;
+				break;
+			}
+		}
+		else {
+			enemyState = IdleState;
+		}
 	}
 }
+
+void ABaseEnemy::ShootProjectle()
+{
+	isAttacking = true;
+	attackingstate = RangedAttacking;
+
+	GetCharacterMovement()->StopMovementImmediately();
+
+
+	GetWorld()->GetTimerManager().ClearTimer(attackingTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(attackingTimerHandle, [&]()
+		{
+			FVector spawnLocation = ProjectileSpawn->GetComponentLocation();
+			FRotator spawnRotation = ProjectileSpawn->GetComponentRotation();
+			//FTransform SpawnTransform = LineTraceComponent->GetComponentTransform();
+
+			if (ProjectileClass) {
+				ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass, spawnLocation, spawnRotation);
+				//ABaseProjectile* Projectile = GetWorld()->SpawnActorDeferred<ABaseProjectile>(ProjectileClass, SpawnTransform);
+				if (Projectile) {
+
+					//Projectile->projectileDamage = weaponDamage;
+					Projectile->SetOwner(this);
+
+				}
+			}
+			else {
+				UE_LOG(LogTemp, Error, TEXT("Empty ProjectileClass"));
+			}
+
+
+			isAttacking = false;
+
+
+		}, 0.5, false);
+}
+
+void ABaseEnemy::MeleeAttack()
+{
+	isAttacking = true;
+	attackingstate = MeleeAttacking;
+
+	GetWorld()->GetTimerManager().ClearTimer(attackingTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(attackingTimerHandle, [&]()
+		{
+			FVector lineTraceLocation = this->GetActorLocation();
+			FVector lineTraceForward = this->GetActorForwardVector();
+			FVector lineTraceEnd = lineTraceForward * 150 + lineTraceLocation;
+			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_Pawn) };
+
+			TArray<AActor*> ActorsToIgnore = { Cast<AActor>(this) };
+			FHitResult HitResult;
+
+			//Line Trace
+			bool hasHit = UKismetSystemLibrary::LineTraceSingleForObjects(this->GetWorld(),
+				lineTraceLocation,
+				lineTraceEnd,
+				ObjectTypes,
+				false,
+				ActorsToIgnore,
+				EDrawDebugTrace::Type::ForDuration,
+				HitResult,
+				true);
+
+			//Apply DMG
+			if (hasHit) {
+				AActor* HitActor = HitResult.GetActor();
+
+				if (HitActor == UGameplayStatics::GetPlayerCharacter(this, 0)) {
+					//AActor* myOwner = GetOwner();
+					AController* MyOwnerInstigator = GetInstigatorController();
+					auto DamageTypeClass = UDamageType::StaticClass();
+					UGameplayStatics::ApplyDamage(HitActor, meleeDamage, MyOwnerInstigator, this, DamageTypeClass);
+				}
+			}
+			
+			isAttacking = false;
+
+		}, 0.5, false);
+
+	
+}
+
+void ABaseEnemy::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser)
+{
+	curHealth -= Damage;
+	UE_LOG(LogTemp, Display, TEXT("Heath: %f"), curHealth);
+
+	if (curHealth <= 0) {
+	
+	}
+
+	
+}
+

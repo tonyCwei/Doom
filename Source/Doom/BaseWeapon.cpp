@@ -114,7 +114,7 @@ void ABaseWeapon::ShootProjectle() {
 		if (Projectile) {
 			//UE_LOG(LogTemp, Display, TEXT("SpawnActorDeferred"));
 			Projectile->projectileDamage = weaponDamage;
-			Projectile->SetOwner(this);
+			Projectile->SetOwner(UGameplayStatics::GetPlayerCharacter(this, 0));
 			//Projectile->FinishSpawning(SpawnTransform);
 		}
 	} else {

@@ -6,6 +6,24 @@
 #include "GameFramework/Character.h"
 #include "BaseEnemy.generated.h"
 
+
+UENUM(BlueprintType)
+enum EnemyState {
+	IdleState UMETA(DisplayName = "Idle"),
+	MovingState UMETA(DisplayName = "Moving"),
+	MeleeAttackState UMETA(DisplayName = "MeleeAttacking"),
+	RangedAttackState UMETA(DisplayName = "RangedAttacking")
+};
+
+
+UENUM(BlueprintType)
+enum AttackingState {
+	MeleeAttacking UMETA(DisplayName = "MeleeAttackState"),
+	RangedAttacking UMETA(DisplayName = "RangedAttackState")
+};
+
+
+
 UCLASS()
 class DOOM_API ABaseEnemy : public ACharacter
 {
@@ -62,7 +80,33 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
 	TArray<class UPaperFlipbook*> directionalFlipbooks;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TArray<class UPaperFlipbook*> movingFlipbooks;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TArray<class UPaperFlipbook*> meleeAttackFlipbooks;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TArray<class UPaperFlipbook*> rangedAttackFlipbooks;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TArray<class UPaperFlipbook*> currentFlipbooks;
+
+	
+	UFUNCTION(BlueprintCallable)
+	void CheckEnemyState();
+
+	FTimerHandle attackingTimerHandle;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TEnumAsByte<EnemyState> enemyState = IdleState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TEnumAsByte<AttackingState> attackingstate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool isAttacking = false;
 	
 	//Ranged Attack
 private:
@@ -74,9 +118,34 @@ private:
 	USceneComponent* ProjectileSpawn;
 
 
+
+
 public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void ShootProjectle();
+
+
+
+// Melee Attack
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float meleeDamage = 1;
+
+
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	virtual void MeleeAttack();
+
+
+// Damage System
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float curHealth = 5;
+
+	UFUNCTION()
+	void TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser) ;
 
 };
