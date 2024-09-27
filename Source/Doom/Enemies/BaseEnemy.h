@@ -146,6 +146,19 @@ private:
 	float curHealth = 5;
 
 	UFUNCTION()
-	void TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser) ;
+	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser);
+
+//Death
+
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	class UPaperFlipbook* deathFlipbook;
+
+	UFUNCTION(BlueprintCallable)
+	void HandleDeath();
+
+	bool isDead = false;
+
+	bool isDying = false;
 
 };

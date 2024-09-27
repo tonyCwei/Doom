@@ -65,7 +65,7 @@ void UPlayerHUD::UpdateCell() {
 
 void UPlayerHUD::UpdateChainsaw()
 {
-    CurrentAmmo->SetText(FText::FromString("Infinity"));
+    CurrentAmmo->SetText(FText::FromString("Melee"));
 }
 
 

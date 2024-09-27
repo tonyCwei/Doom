@@ -89,6 +89,17 @@ void ABaseWeapon::FireWeapon(){
 		AController* MyOwnerInstigator = GetInstigatorController();
 		auto DamageTypeClass = UDamageType::StaticClass();
 		UGameplayStatics::ApplyDamage(HitActor, weaponDamage, MyOwnerInstigator, this, DamageTypeClass);
+
+		
+		if (HitActor->ActorHasTag("enemy")) {
+			
+			if (bloodToSpawn) {
+				FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(HitResult.Location, playerCharacter->GetActorLocation());
+				GetWorld()->SpawnActor<AActor>(bloodToSpawn, HitResult.Location, spawnRotation);
+			}
+		}
+
+
 	}
 
 	//Decrease Ammo

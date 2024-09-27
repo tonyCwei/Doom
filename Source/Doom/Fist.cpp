@@ -8,9 +8,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/Character.h"
+#include "DoomCharacter.h"
+#include "Enemies/BaseEnemy.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void AFist::FireWeapon() {
-   Super::FireWeapon();
+   //Super::FireWeapon();
    Punch();
    resetFlipbook();
 }
@@ -44,6 +47,24 @@ void AFist::FireWeapon() {
  		AController* MyOwnerInstigator = GetInstigatorController();
  		auto DamageTypeClass = UDamageType::StaticClass();
  		UGameplayStatics::ApplyDamage(HitActor, weaponDamage, MyOwnerInstigator, this, DamageTypeClass);
+
+        if (HitActor->ActorHasTag("enemy")) {
+            //Knock Enemy Back with Fist
+            ABaseEnemy* enemyCharacter = Cast<ABaseEnemy>(HitActor);
+
+            FVector launchDirection = enemyCharacter->GetActorLocation() - playerCharacter->GetActorLocation();
+            launchDirection.Normalize();
+
+            enemyCharacter->GetCharacterMovement()->StopMovementKeepPathing();
+            FVector LaunchVelocity(launchDirection.X * 3000, launchDirection.Y * 3000, 0);
+            enemyCharacter->LaunchCharacter(LaunchVelocity, true, false);
+
+            ////Spawn Blood
+            //if (bloodToSpawn) {
+            //    FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(HitResult.Location, playerCharacter->GetActorLocation());
+            //    GetWorld()->SpawnActor<AActor>(bloodToSpawn, HitResult.Location, spawnRotation);
+            //}
+        }
  	}
 
      PlayFireAnimation();

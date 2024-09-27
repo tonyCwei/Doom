@@ -9,7 +9,9 @@
 #include <Kismet/KismetMathLibrary.h>
 #include "Doom/Projectile/BaseProjectile.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "AIController.h"
+#include "BrainComponent.h"
+#include "Components/CapsuleComponent.h"
 
 
 // Sets default values
@@ -33,7 +35,7 @@ void ABaseEnemy::BeginPlay()
 	playerCharacter = Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	currentFlipbooks = directionalFlipbooks;
 
-	OnTakeAnyDamage.AddDynamic(this, &ABaseEnemy::TakeDamage);
+	OnTakeAnyDamage.AddDynamic(this, &ABaseEnemy::DamageTaken);
 	
 }
 
@@ -43,14 +45,18 @@ void ABaseEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CheckEnemyState();
 
-	if (canSeePlayer) {
+	if (canSeePlayer && !isDead) {
 		rotateToPlayer(DeltaTime);
 	}
-	else {
-		
-	}
 
-	updateDirectionalSprite();
+	if (isDead) {
+		HandleDeath();
+	}
+	else {
+		updateDirectionalSprite();
+	}
+	
+	
 }
 
 // Called to bind functionality to input
@@ -64,6 +70,9 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void ABaseEnemy::updateDirectionalSprite()
 {
+	
+
+
 	FVector vEnemeyPlayer = playerCharacter->GetActorLocation() - GetActorLocation();
 	vEnemeyPlayer.Normalize();
 
@@ -281,15 +290,54 @@ void ABaseEnemy::MeleeAttack()
 	
 }
 
-void ABaseEnemy::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser)
+void ABaseEnemy::DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser)
 {
 	curHealth -= Damage;
 	UE_LOG(LogTemp, Display, TEXT("Heath: %f"), curHealth);
 
 	if (curHealth <= 0) {
-	
+		isDead = true;
 	}
 
 	
 }
 
+void ABaseEnemy::HandleDeath() {
+	
+	
+
+	//Face Player
+	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), playerCharacter->GetActorLocation());
+	this->SetActorRotation(TargetRotation);
+
+
+	if (isDying) return;
+
+	//Stop AI
+	AController* myEnemyController = this->GetController();
+	AAIController* myAIEnemyController;
+	if (myEnemyController) {
+		myAIEnemyController = Cast<AAIController>(myEnemyController);
+		myAIEnemyController->GetBrainComponent()->StopLogic("isDead");
+	}
+		
+	
+
+
+	//Update Flipbook
+	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	EnemyFlipBookComponent->SetRelativeRotation(FRotator(0, -90, 0));
+	EnemyFlipBookComponent->SetFlipbook(deathFlipbook);
+	EnemyFlipBookComponent->SetLooping(false);
+	
+	FTimerHandle deathTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(deathTimerHandle, [&]()
+		{
+			Destroy();
+		}, 3, false);
+
+	isDying = true;
+}
