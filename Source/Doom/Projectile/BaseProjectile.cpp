@@ -57,7 +57,7 @@ void ABaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	sphereCollision->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
-	//sphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
+	sphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
 	
 }
 
@@ -77,13 +77,24 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 			return;
 		}
 
+
+		UE_LOG(LogTemp, Display, TEXT("On hit"));
+
+
 		//Apply Damage
 		auto MyOwnerInstigator = MyOwner->GetInstigatorController();
 		auto DamageTypeClass = UDamageType::StaticClass();
 
-		if (OtherActor && OtherActor != this && OtherActor != MyOwner) {
-			UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
+		if (OtherActor && OtherActor != MyOwner && !OtherActor->ActorHasTag("Projectile")) {
+			if (MyOwner->ActorHasTag("enemy") && OtherActor->ActorHasTag("enemy")) {
+				UGameplayStatics::ApplyDamage(OtherActor, 1, MyOwnerInstigator, this, DamageTypeClass);
+			}
+			else {
+				UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
+			}
+
 		}
+
 
 		sphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -98,6 +109,49 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 				Destroy();
 			}, projectileFlipbookComponent->GetFlipbookLength() * 0.9, false);
 		//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
+
+		
+		
+}
+
+void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!isEnemyProjectile) return;
+
+	AActor* MyOwner = GetOwner();
+	if (MyOwner == nullptr) {
+		Destroy();
+		return;
+	}
+
+
+	UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
+
+	//Apply Damage
+	auto MyOwnerInstigator = MyOwner->GetInstigatorController();
+	auto DamageTypeClass = UDamageType::StaticClass();
+
+	if (OtherActor && OtherActor != MyOwner && !OtherActor->ActorHasTag("Projectile")) {
+		UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
+	}
+
+	sphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	projectileMovement->StopMovementImmediately();
+
+	//Set flipbook and destroy, may need set scale
+	projectileFlipbookComponent->SetWorldScale3D(destroyScale);
+	projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
+
+	//Destroy after destroyFlipbook finishes playing
+	FTimerHandle ProjectileTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
+		{
+			Destroy();
+		}, projectileFlipbookComponent->GetFlipbookLength() * 0.9, false);
+	//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
+
+
+
 }
 
 

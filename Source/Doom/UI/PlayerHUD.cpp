@@ -13,7 +13,7 @@ void UPlayerHUD::NativeConstruct()
 {
     Super::NativeConstruct();
     playerCharacter = Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this,0));
-    InitlizeAmmo();
+    InitlizePlayerHUD();
 }
 
 void UPlayerHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -31,7 +31,8 @@ void UPlayerHUD::updateStaminaBar()
     staminaProgressBar->SetPercent(playerCharacter->stamina / playerCharacter->maxStamina);
 }
 
-void UPlayerHUD::InitlizeAmmo() {
+void UPlayerHUD::InitlizePlayerHUD() {
+    //Ammo
     maxBulletNo->SetText(FText::AsNumber(playerCharacter->getMaxBullet()));
     maxShellNo->SetText(FText::AsNumber(playerCharacter->getMaxShell()));
     maxRocketNo->SetText(FText::AsNumber(playerCharacter->getMaxRocket())); 
@@ -41,6 +42,10 @@ void UPlayerHUD::InitlizeAmmo() {
     UpdateShell();
     UpdateRocket();
     UpdateCell();
+
+    //Health and Shield
+    CurrentHealth->SetText(FText::AsNumber(playerCharacter->getCurHealth()));
+    CurrentShield->SetText(FText::AsNumber(playerCharacter->getCurShield()));
 }
 
 void UPlayerHUD::UpdateBullet() {
@@ -66,6 +71,16 @@ void UPlayerHUD::UpdateCell() {
 void UPlayerHUD::UpdateChainsaw()
 {
     CurrentAmmo->SetText(FText::FromString("Melee"));
+}
+
+void UPlayerHUD::UpdateCurrentHealth()
+{
+    CurrentHealth->SetText(FText::AsNumber(playerCharacter->getCurHealth()));
+}
+
+void UPlayerHUD::UpdateCurrentShield()
+{
+    CurrentShield->SetText(FText::AsNumber(playerCharacter->getCurShield()));
 }
 
 

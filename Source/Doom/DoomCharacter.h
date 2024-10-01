@@ -355,5 +355,58 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void WeaponSwap(int32 WeaponIndex);
 
+
+	//Health and Shield
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float curHealth = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float maxHealth = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float curShield = 15;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	float maxShield = 100;
+
+	//Take Damage
+	UFUNCTION()
+	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser);
+
+	//Death
+	UFUNCTION(BlueprintCallable)
+	void HandleDeath();
+
+public:
+	//Setter and Getter
+	UFUNCTION(BlueprintCallable)
+	float getCurHealth() const { return curHealth; }
+
+	UFUNCTION(BlueprintCallable)
+	float getMaxHealth() const { return maxHealth; }
+
+	UFUNCTION(BlueprintCallable)
+	float getCurShield() const { return curShield; }
+
+	UFUNCTION(BlueprintCallable)
+	float getMaxShield() const { return maxShield; }
+
+	UFUNCTION(BlueprintCallable)
+	void setCurHealth(float curHealth_) { curHealth = curHealth_; }
+
+	UFUNCTION(BlueprintCallable)
+	void setMaxHealth(float maxHealth_) { maxHealth = maxHealth_; }
+
+	UFUNCTION(BlueprintCallable)
+	void setCurShield(float curShield_) { curShield = curShield_; }
+
+	UFUNCTION(BlueprintCallable)
+	void setMaxShield(float maxShield_) { maxShield = maxShield_; }
+
+
+	
+
 };
 

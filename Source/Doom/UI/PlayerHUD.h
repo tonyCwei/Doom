@@ -57,9 +57,16 @@ private:
 
 	void updateStaminaBar();
 
+	//Health and Shield
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CurrentHealth;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CurrentShield;
+
 public:
 
-	void InitlizeAmmo();
+	void InitlizePlayerHUD();
 
 	void UpdateBullet();
 
@@ -70,6 +77,10 @@ public:
 	void UpdateCell();
 
 	void UpdateChainsaw();
+
+	void UpdateCurrentHealth();
+
+	void UpdateCurrentShield();
 
 
 };

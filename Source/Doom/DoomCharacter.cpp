@@ -141,6 +141,9 @@ void ADoomCharacter::BeginPlay()
 
 	//Sprint
 	WalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
+	//Bind anyDamage
+	OnTakeAnyDamage.AddDynamic(this, &ADoomCharacter::DamageTaken);
 	
 
 }
@@ -472,6 +475,10 @@ void ADoomCharacter::WeaponSwap(int32 WeaponIndex)
 	SwapIndex = WeaponIndex;
 }
 
+
+
+
+
 void ADoomCharacter::SwapWeapon1(const FInputActionValue& Value)
 {
 	WeaponSwap(1);
@@ -544,7 +551,31 @@ void ADoomCharacter::WeaponSwapResetTimelineFinished()
 }
 
 
+void ADoomCharacter::DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser)
+{
+	if (curShield > 0) {
+		curShield -= Damage;
+		if (curShield <= 0) {
+			curShield = 0;
+		}
+	}
+	else {
+		curHealth -= Damage;
+	}
 
+	if (curHealth <= 0) {
+		curHealth = 0;
+		HandleDeath();
+	}
+
+	playerHUD->UpdateCurrentHealth();
+	playerHUD->UpdateCurrentShield();
+}
+
+void ADoomCharacter::HandleDeath()
+{
+
+}
 
 
 

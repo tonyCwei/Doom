@@ -53,13 +53,17 @@ private:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	/*UFUNCTION()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool isEnemyProjectile = false;
+
+	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 					  AActor* OtherActor,
 					  UPrimitiveComponent* OtherComp,
 					  int32 OtherBodyIndex,
 					  bool bFromSweep,
-					  const FHitResult& SweepResult);*/
+					  const FHitResult& SweepResult);
 
 	
 

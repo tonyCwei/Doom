@@ -215,32 +215,30 @@ void ABaseEnemy::ShootProjectle()
 
 	GetCharacterMovement()->StopMovementImmediately();
 
+	FVector spawnLocation = ProjectileSpawn->GetComponentLocation();
+	//FRotator spawnRotation = ProjectileSpawn->GetComponentRotation();
+	FVector playerLocation = playerCharacter->GetActorLocation();
+	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), FVector(playerLocation.X, playerLocation.Y, playerLocation.Z + 60));
+
+	if (ProjectileClass) {
+		ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass, spawnLocation, spawnRotation);
+		//ABaseProjectile* Projectile = GetWorld()->SpawnActorDeferred<ABaseProjectile>(ProjectileClass, SpawnTransform);
+		if (Projectile) {
+
+			//Projectile->projectileDamage = weaponDamage;
+			Projectile->SetOwner(this);
+
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Empty ProjectileClass"));
+	}
+
 
 	GetWorld()->GetTimerManager().ClearTimer(attackingTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(attackingTimerHandle, [&]()
 		{
-			FVector spawnLocation = ProjectileSpawn->GetComponentLocation();
-			FRotator spawnRotation = ProjectileSpawn->GetComponentRotation();
-			//FTransform SpawnTransform = LineTraceComponent->GetComponentTransform();
-
-			if (ProjectileClass) {
-				ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass, spawnLocation, spawnRotation);
-				//ABaseProjectile* Projectile = GetWorld()->SpawnActorDeferred<ABaseProjectile>(ProjectileClass, SpawnTransform);
-				if (Projectile) {
-
-					//Projectile->projectileDamage = weaponDamage;
-					Projectile->SetOwner(this);
-
-				}
-			}
-			else {
-				UE_LOG(LogTemp, Error, TEXT("Empty ProjectileClass"));
-			}
-
-
 			isAttacking = false;
-
-
 		}, 0.5, false);
 }
 
@@ -249,40 +247,40 @@ void ABaseEnemy::MeleeAttack()
 	isAttacking = true;
 	attackingstate = MeleeAttacking;
 
+	FVector lineTraceLocation = this->GetActorLocation();
+	FVector lineTraceForward = this->GetActorForwardVector();
+	FVector lineTraceEnd = lineTraceForward * 150 + lineTraceLocation;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_Pawn) };
+
+	TArray<AActor*> ActorsToIgnore = { Cast<AActor>(this) };
+	FHitResult HitResult;
+
+	//Line Trace
+	bool hasHit = UKismetSystemLibrary::LineTraceSingleForObjects(this->GetWorld(),
+		lineTraceLocation,
+		lineTraceEnd,
+		ObjectTypes,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::Type::ForDuration,
+		HitResult,
+		true);
+
+	//Apply DMG
+	if (hasHit) {
+		AActor* HitActor = HitResult.GetActor();
+
+		if (HitActor == UGameplayStatics::GetPlayerCharacter(this, 0)) {
+			//AActor* myOwner = GetOwner();
+			AController* MyOwnerInstigator = GetInstigatorController();
+			auto DamageTypeClass = UDamageType::StaticClass();
+			UGameplayStatics::ApplyDamage(HitActor, meleeDamage, MyOwnerInstigator, this, DamageTypeClass);
+		}
+	}
+
 	GetWorld()->GetTimerManager().ClearTimer(attackingTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(attackingTimerHandle, [&]()
 		{
-			FVector lineTraceLocation = this->GetActorLocation();
-			FVector lineTraceForward = this->GetActorForwardVector();
-			FVector lineTraceEnd = lineTraceForward * 150 + lineTraceLocation;
-			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_Pawn) };
-
-			TArray<AActor*> ActorsToIgnore = { Cast<AActor>(this) };
-			FHitResult HitResult;
-
-			//Line Trace
-			bool hasHit = UKismetSystemLibrary::LineTraceSingleForObjects(this->GetWorld(),
-				lineTraceLocation,
-				lineTraceEnd,
-				ObjectTypes,
-				false,
-				ActorsToIgnore,
-				EDrawDebugTrace::Type::ForDuration,
-				HitResult,
-				true);
-
-			//Apply DMG
-			if (hasHit) {
-				AActor* HitActor = HitResult.GetActor();
-
-				if (HitActor == UGameplayStatics::GetPlayerCharacter(this, 0)) {
-					//AActor* myOwner = GetOwner();
-					AController* MyOwnerInstigator = GetInstigatorController();
-					auto DamageTypeClass = UDamageType::StaticClass();
-					UGameplayStatics::ApplyDamage(HitActor, meleeDamage, MyOwnerInstigator, this, DamageTypeClass);
-				}
-			}
-			
 			isAttacking = false;
 
 		}, 0.5, false);
