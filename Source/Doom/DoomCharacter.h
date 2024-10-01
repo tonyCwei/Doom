@@ -157,8 +157,14 @@ private:
 	TSubclassOf<class UPlayerHUD> playerHUDClass;
 
 	class UPlayerHUD* playerHUD;
-	
+
 	void UpdateCurAmmoText();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HUD", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> DamagedHUDClass;
+	
+	
+	
 
 public:
 	//Getter

@@ -422,12 +422,12 @@ void ADoomCharacter::WeaponBobTimelineUpdate(float HValue, float VValue)
 	float curX = WeaponChildActorComponent->GetRelativeLocation().X;
 
 	//Horizontal bobing range
-	float YAValue = WeaponChildActorComponent->GetRelativeLocation().Y + 0.02;
-	float YBValue = WeaponChildActorComponent->GetRelativeLocation().Y - 0.02;
+	float YAValue = WeaponChildActorComponent->GetRelativeLocation().Y + 0.04;
+	float YBValue = WeaponChildActorComponent->GetRelativeLocation().Y - 0.04;
 	float newY = FMath::Lerp(YAValue, YBValue, HValue);
 	//Vetical Bobing range
-	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z + 0.01;
-	float ZBValue = WeaponChildActorComponent->GetRelativeLocation().Z - 0.01;
+	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z + 0.02;
+	float ZBValue = WeaponChildActorComponent->GetRelativeLocation().Z - 0.02;
 	float newZ = FMath::Lerp(ZAValue, ZBValue, VValue);
 
 	WeaponChildActorComponent->SetRelativeLocation(FVector(curX, newY, newZ));
@@ -570,6 +570,14 @@ void ADoomCharacter::DamageTaken(AActor* DamagedActor, float Damage, const UDama
 
 	playerHUD->UpdateCurrentHealth();
 	playerHUD->UpdateCurrentShield();
+
+
+	if (DamagedHUDClass) {
+		UUserWidget* DamagedHUD = CreateWidget<UUserWidget>(this->GetWorld(), DamagedHUDClass);
+		if (DamagedHUD) {
+			DamagedHUD->AddToViewport();
+		}
+	}
 }
 
 void ADoomCharacter::HandleDeath()

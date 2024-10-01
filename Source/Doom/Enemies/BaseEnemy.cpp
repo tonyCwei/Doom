@@ -12,6 +12,8 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
 
 
 // Sets default values
@@ -67,6 +69,18 @@ void ABaseEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 }
 
 
+
+AAIController* ABaseEnemy::getAIController()
+{
+	AController* myEnemyController = this->GetController();
+	AAIController* myAIEnemyController;
+	if (myEnemyController) {
+		myAIEnemyController = Cast<AAIController>(myEnemyController);
+		if (myAIEnemyController) return myAIEnemyController;
+		
+	}
+	return nullptr;
+}
 
 void ABaseEnemy::updateDirectionalSprite()
 {
@@ -218,7 +232,7 @@ void ABaseEnemy::ShootProjectle()
 	FVector spawnLocation = ProjectileSpawn->GetComponentLocation();
 	//FRotator spawnRotation = ProjectileSpawn->GetComponentRotation();
 	FVector playerLocation = playerCharacter->GetActorLocation();
-	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), FVector(playerLocation.X, playerLocation.Y, playerLocation.Z + 60));
+	FRotator spawnRotation = UKismetMathLibrary::FindLookAtRotation(this->GetActorLocation(), FVector(playerLocation.X, playerLocation.Y, playerLocation.Z + 50));
 
 	if (ProjectileClass) {
 		ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(ProjectileClass, spawnLocation, spawnRotation);
@@ -297,6 +311,14 @@ void ABaseEnemy::DamageTaken(AActor* DamagedActor, float Damage, const UDamageTy
 		isDead = true;
 	}
 
+	//Sense player when damaged
+	AAIController* myAIEnemyController = getAIController();
+	if (myAIEnemyController) {
+		UBlackboardComponent* MyBlackboard = myAIEnemyController->GetBlackboardComponent();
+		canSeePlayer = true;
+		if (MyBlackboard) MyBlackboard->SetValueAsBool(FName("CanSeePlayer"), true);
+	}
+	
 	
 }
 
@@ -312,10 +334,8 @@ void ABaseEnemy::HandleDeath() {
 	if (isDying) return;
 
 	//Stop AI
-	AController* myEnemyController = this->GetController();
-	AAIController* myAIEnemyController;
-	if (myEnemyController) {
-		myAIEnemyController = Cast<AAIController>(myEnemyController);
+	AAIController* myAIEnemyController = getAIController();
+	if (myAIEnemyController) {
 		myAIEnemyController->GetBrainComponent()->StopLogic("isDead");
 	}
 		

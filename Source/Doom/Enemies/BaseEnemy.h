@@ -61,6 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void setCanSeePlayer(bool canSeePlayer_) { canSeePlayer = canSeePlayer_; }
 
+	UFUNCTION(BlueprintCallable)
+	class AAIController* getAIController();
+
 
 	//Flipbook
 protected: 
