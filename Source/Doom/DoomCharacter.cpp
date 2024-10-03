@@ -139,6 +139,8 @@ void ADoomCharacter::BeginPlay()
 	WeaponSwapResetTimelineFinishedEvent.BindUFunction(this, FName("WeaponSwapResetTimelineFinished"));
 	WeaponSwapResetTimeline->SetTimelineFinishedFunc(WeaponSwapResetTimelineFinishedEvent);
 
+
+
 	//Sprint
 	WalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 
@@ -306,10 +308,14 @@ void ADoomCharacter::UpdateCurAmmoText()
 }
 
 void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
-	WeaponChildActorComponent->SetChildActorClass(WeaponClass);
+	//WeaponChildActorComponent->SetChildActorClass(WeaponClass);
 	AllWeapons.Add(WeaponClass);
-	mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
-	UpdateCurAmmoText();
+	//mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
+	//UpdateCurAmmoText();
+
+	//Play swap animation
+	WeaponSwap(AllWeapons.Num()-1);
+
 
 	GetWorldTimerManager().ClearTimer(MeleeHandle);
 	canMelee = true;
@@ -426,8 +432,8 @@ void ADoomCharacter::WeaponBobTimelineUpdate(float HValue, float VValue)
 	float YBValue = WeaponChildActorComponent->GetRelativeLocation().Y - 0.04;
 	float newY = FMath::Lerp(YAValue, YBValue, HValue);
 	//Vetical Bobing range
-	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z + 0.02;
-	float ZBValue = WeaponChildActorComponent->GetRelativeLocation().Z - 0.02;
+	float ZAValue = WeaponChildActorComponent->GetRelativeLocation().Z + 0.01;
+	float ZBValue = WeaponChildActorComponent->GetRelativeLocation().Z - 0.01;
 	float newZ = FMath::Lerp(ZAValue, ZBValue, VValue);
 
 	WeaponChildActorComponent->SetRelativeLocation(FVector(curX, newY, newZ));
@@ -437,7 +443,10 @@ void ADoomCharacter::WeaponBobTimelineUpdate(float HValue, float VValue)
 
 void ADoomCharacter::WeaponBob(float DeltaTime)
 {
-	if (isMoving() && ShouldBob && !IsSwapping) {
+	if (IsSwapping) return;
+
+
+	if (isMoving() && ShouldBob ) {
 		WeaponBobTimeline->Play();
 	}
 	else {
@@ -449,6 +458,7 @@ void ADoomCharacter::WeaponBob(float DeltaTime)
 			25
 		);
 		WeaponChildActorComponent->SetRelativeLocation(newWeaponLocation);
+		
 	}
 	
 }

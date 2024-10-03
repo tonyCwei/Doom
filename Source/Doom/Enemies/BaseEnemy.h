@@ -51,7 +51,7 @@ protected:
 	//Player Reference
 	class ADoomCharacter* playerCharacter;
 
-private:
+
 	bool canSeePlayer = false;
 
 public:
@@ -70,7 +70,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
 	class UPaperFlipbookComponent* EnemyFlipBookComponent;
 
-private:
+
 	void updateDirectionalSprite();
 
 	void updateFlipbook(float degree, int32 index);
@@ -112,7 +112,7 @@ public:
 	bool isAttacking = false;
 	
 	//Ranged Attack
-private:
+protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ABaseProjectile> ProjectileClass;
@@ -131,7 +131,7 @@ public:
 
 
 // Melee Attack
-private:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float meleeDamage = 1;
 
@@ -144,7 +144,7 @@ public:
 
 
 // Damage System
-private:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float curHealth = 5;
 
@@ -153,7 +153,7 @@ private:
 
 //Death
 
-private:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
 	class UPaperFlipbook* deathFlipbook;
 

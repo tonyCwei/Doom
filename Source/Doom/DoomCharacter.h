@@ -282,6 +282,8 @@ protected:
 
 	UTimelineComponent* WeaponBobTimeline;
 
+	
+
 	UFUNCTION()
 	void WeaponBobTimelineProgress();
 
