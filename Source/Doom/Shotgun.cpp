@@ -3,6 +3,12 @@
 
 #include "Shotgun.h"
 
+void AShotgun::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    GetWorldTimerManager().ClearTimer(ShotgunTimerHandle);
+}
+
 void AShotgun::FireWeapon() {
     if (bFireOnce) {
         bFireOnce = false;
@@ -10,7 +16,7 @@ void AShotgun::FireWeapon() {
         resetFlipbook();
 
         //control fire rate
-        FTimerHandle ShotgunTimerHandle;
+        
 	    GetWorld()->GetTimerManager().SetTimer(ShotgunTimerHandle, [&]()
 	    {
 	    bFireOnce = true;

@@ -15,9 +15,12 @@ class DOOM_API AShotgun : public ABaseWeapon
 	GENERATED_BODY()
 
 private:
+	FTimerHandle ShotgunTimerHandle;
 
 	bool bFireOnce = true;
 
+protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 public:
 

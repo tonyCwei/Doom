@@ -15,6 +15,9 @@
 #include "BaseWeapon.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Ability/BulletTimeAura.h"
+
 
 
 
@@ -150,6 +153,14 @@ void ADoomCharacter::BeginPlay()
 
 }
 
+void ADoomCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	ClearAllTimerHandles();
+
+}
+
 void ADoomCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -238,7 +249,7 @@ void ADoomCharacter::Shoot(const FInputActionValue& Value) {
 	ShouldBob = false;
 	WeaponChildActorComponent->SetRelativeLocation(WeaponChildActorLocation);
 
-	FTimerHandle ShootMeleeHandle;
+	
 	GetWorld()->GetTimerManager().SetTimer(ShootMeleeHandle, [&]()
 	{
 		isShooting = false;
@@ -273,6 +284,17 @@ void ADoomCharacter::Melee(const FInputActionValue& Value) {
 			canMelee = true;
 		}
 	}, meleeRate, false);
+}
+
+void ADoomCharacter::ClearAllTimerHandles()
+{
+	GetWorldTimerManager().ClearTimer(MeleeHandle);
+	GetWorldTimerManager().ClearTimer(regenTimerHandle);
+	GetWorldTimerManager().ClearTimer(sprintTimerHandle);
+	GetWorldTimerManager().ClearTimer(ShootMeleeHandle);
+	GetWorldTimerManager().ClearTimer(dashTimerHandle);
+	GetWorldTimerManager().ClearTimer(perfectDodgeTimerHandle);
+	GetWorldTimerManager().ClearTimer(perfectDodgeEffectHandle);
 }
 
 
@@ -354,11 +376,13 @@ void ADoomCharacter::drainStamina()
 		SprintEnd(1);
 	}
 	else if (isSprinting) {
-		FTimerHandle sprintTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(sprintTimerHandle, [&]()
-			{
-				drainStamina();
-			}, 0.01, false);
+		
+		GetWorldTimerManager().SetTimer(sprintTimerHandle, [&]()
+				{
+					drainStamina();
+				}, 0.01, false);
+		
+		
 	}
 }
 
@@ -370,11 +394,13 @@ void ADoomCharacter::regenStamina()
 	if (stamina >= maxStamina) stamina = maxStamina;
 
 	if (stamina < maxStamina) {
-		FTimerHandle sprintTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(sprintTimerHandle, [&]()
-			{
-				regenStamina();
-			}, 0.01, false);
+		
+		GetWorldTimerManager().SetTimer(sprintTimerHandle, [&]()
+				{
+					regenStamina();
+				}, 0.01, false);
+		
+		
 	}
 	
 }
@@ -383,8 +409,9 @@ void ADoomCharacter::regenStamina()
 
 void ADoomCharacter::Dash(const FInputActionValue& Value)
 {
-	if (isDashing || stamina < 25  || !isMoving()) return;
+	if (isDashing || stamina < 25 ) return;
 
+	isInvincible = true;
 	isDashing = true;
 
 	stamina -= 25;
@@ -392,14 +419,28 @@ void ADoomCharacter::Dash(const FInputActionValue& Value)
 
 
 	//If using base velocity without normalize, dash will not work while character switching to oppsite direction
-	FVector movingVelocity = GetVelocity();
-	movingVelocity.Normalize();
-
-	FVector LaunchVelocity(movingVelocity.X * 5000, movingVelocity.Y * 5000, 0);
+	FVector LaunchVelocity;
+	
+	
+	if (isMoving()) {
+		FVector movingVelocity = GetVelocity();
+		movingVelocity.Normalize();
+		LaunchVelocity = FVector(movingVelocity.X * 5000, movingVelocity.Y * 5000, 0);
+	}
+	else {
+		FVector playerForward = this->GetActorForwardVector();
+		LaunchVelocity = FVector(playerForward.X * -5000, playerForward.Y * -5000, 0);
+	}
+	
+	
 	LaunchCharacter(LaunchVelocity, false, false);
 
+	GetWorld()->GetTimerManager().SetTimer(perfectDodgeTimerHandle, [&]()
+		{
+			isInvincible = false;
+		}, perfectDodgeWindow, false);
 
-	FTimerHandle dashTimerHandle;
+	
 	GetWorld()->GetTimerManager().SetTimer(dashTimerHandle, [&]()
 		{
 			isDashing = false;
@@ -411,7 +452,53 @@ void ADoomCharacter::Dash(const FInputActionValue& Value)
 			regenStamina();
 		}, 1, false);
 
+	checkPerfectDodge();
+
 }
+
+void ADoomCharacter::checkPerfectDodge()
+{
+	for (FAttackInfo attackInfo : activeAttacks) {
+		
+		float timeTillHit = attackInfo.StartTime + attackInfo.Duration - GetWorld()->GetTimeSeconds();
+
+		UE_LOG(LogTemp, Display, TEXT("%f"), timeTillHit);
+		if (timeTillHit > 0 && timeTillHit <= perfectDodgeWindow) {
+			perfectDodge();
+		}
+	
+	}
+}
+
+void ADoomCharacter::perfectDodge()
+{
+	FVector spawnLocation = GetActorLocation();
+	FRotator spawnRotation = GetActorRotation();
+	//FTransform SpawnTransform = LineTraceComponent->GetComponentTransform();
+
+	if (myBulletTimeAura) {
+		GetWorld()->SpawnActor<ABulletTimeAura>(myBulletTimeAura, spawnLocation, spawnRotation);
+	}
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f);
+
+	GetWorld()->GetTimerManager().SetTimer(perfectDodgeEffectHandle, [&]()
+		{
+			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+		}, 0.05, false);
+		
+}
+
+void ADoomCharacter::addAttack(FAttackInfo curAttackInfo)
+{
+	activeAttacks.Add(curAttackInfo);
+}
+
+void ADoomCharacter::removeAttack(FAttackInfo curAttackInfo)
+{
+	activeAttacks.Remove(curAttackInfo);
+}
+
 
 //Weapon Bob
 void ADoomCharacter::WeaponBobTimelineProgress(){
@@ -563,6 +650,8 @@ void ADoomCharacter::WeaponSwapResetTimelineFinished()
 
 void ADoomCharacter::DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* DamageInstigator, AActor* DamageCauser)
 {
+	if (isInvincible) return;
+
 	if (curShield > 0) {
 		curShield -= Damage;
 		if (curShield <= 0) {

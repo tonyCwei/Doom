@@ -8,6 +8,12 @@
 
 
 
+void AMinigun::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    GetWorldTimerManager().ClearTimer(minigunEvent);
+}
+
 void AMinigun::FireWeapon() {
     GetWorld()->GetTimerManager().SetTimer(minigunEvent, this, &AMinigun::CallFire, fireRate, true, 0);
 }

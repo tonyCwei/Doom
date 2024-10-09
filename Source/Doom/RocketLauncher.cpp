@@ -3,6 +3,12 @@
 
 #include "RocketLauncher.h"
 
+void ARocketLauncher::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    GetWorldTimerManager().ClearTimer(RocketLauncherTimerHandle);
+}
+
 void ARocketLauncher::FireWeapon() {
     if (bFireOnce) {
         bFireOnce = false;
@@ -10,7 +16,7 @@ void ARocketLauncher::FireWeapon() {
         resetFlipbook();
 
         //control fire rate
-        FTimerHandle RocketLauncherTimerHandle;
+       
 	    GetWorld()->GetTimerManager().SetTimer(RocketLauncherTimerHandle, [&]()
 	    {
 	    bFireOnce = true;

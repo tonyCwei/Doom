@@ -18,6 +18,26 @@ class UTimelineComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+
+USTRUCT(BlueprintType)
+struct FAttackInfo
+{
+	GENERATED_BODY()
+
+	float StartTime;
+
+	float Duration;
+
+	AActor* Attacker;
+
+	bool operator==(const FAttackInfo& Other) const
+	{
+		return (StartTime == Other.StartTime &&
+			Duration == Other.Duration &&
+			Attacker == Other.Attacker);
+	}
+};
+
 UCLASS(config=Game)
 class ADoomCharacter : public ACharacter
 {
@@ -56,6 +76,8 @@ public:
 
 protected:
 	virtual void BeginPlay();
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 public:
 	// Called every frame
@@ -117,11 +139,29 @@ private:
 
 	bool canMelee = true;
 
-	FTimerHandle MeleeHandle;
+	
 
 	bool isShooting = false;
 
-	
+//TimerHandles
+private:
+	FTimerHandle MeleeHandle;
+
+	FTimerHandle regenTimerHandle;
+
+	FTimerHandle sprintTimerHandle;
+
+	FTimerHandle ShootMeleeHandle;
+
+	FTimerHandle dashTimerHandle;
+
+	FTimerHandle perfectDodgeTimerHandle;
+
+	FTimerHandle perfectDodgeEffectHandle;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void ClearAllTimerHandles();
 
 //Different Types of Bullets
 	//Pistol
@@ -234,7 +274,7 @@ private:
 
 	float WalkSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed = 1000;
 
 	void SprintStart(const FInputActionValue& Value);
@@ -245,28 +285,65 @@ private:
 
 	void regenStamina();
 
-	FTimerHandle regenTimerHandle;
+	
 
 public:
 	bool isSprinting = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float stamina = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float maxStamina = 100;
 
-//Dash
+//Dash and Dodge
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashAction;
 
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ABulletTimeAura> myBulletTimeAura;
 
 	bool isDashing = false;
 
+	bool isInvincible = false;
+
 	float dashCD = 1;
 
+	UFUNCTION()
 	void Dash(const FInputActionValue& Value);
+
+	//perfect dodges
+	TArray<FAttackInfo> activeAttacks;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
+	float perfectDodgeWindow = 0.5;
+
+public:	
+
+	UFUNCTION(BlueprintCallable)
+	bool getIsInvincible() const { return isInvincible; }
+
+	//Perfect Dodge
+	UFUNCTION(BlueprintCallable)
+	void checkPerfectDodge();
+
+	UFUNCTION(BlueprintCallable)
+	void perfectDodge();
+
+	UFUNCTION(BlueprintCallable)
+	void addAttack(FAttackInfo curAttackInfo);
+
+	UFUNCTION(BlueprintCallable)
+	void removeAttack(FAttackInfo curAttackInfo);
+
+	UFUNCTION(BlueprintCallable)
+	int getActiveAttacksSize() { return activeAttacks.Num(); }
+
+
+
 
 //Weapon Bob
 protected:
@@ -367,16 +444,16 @@ public:
 	//Health and Shield
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float curHealth = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float maxHealth = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float curShield = 15;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float maxShield = 100;
 
 	//Take Damage

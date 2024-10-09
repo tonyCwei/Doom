@@ -6,9 +6,12 @@
 #include "PaperFlipbook.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "Doom/Ability/BulletTimeAura.h"
+
 
 
 // Sets default values
@@ -22,8 +25,8 @@ ABaseProjectile::ABaseProjectile()
 	// 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComponent"));
 	// }
 	
-	sphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollision"));
-	RootComponent = sphereCollision;
+	sphereCollisionDamage = CreateDefaultSubobject<USphereComponent>(TEXT("sphereCollisionDamage"));
+	RootComponent = sphereCollisionDamage;
 
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
 	ArrowComponent->SetupAttachment(RootComponent);
@@ -31,7 +34,8 @@ ABaseProjectile::ABaseProjectile()
 	projectileFlipbookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("ProjectileFlipBook"));
 	projectileFlipbookComponent->SetupAttachment(RootComponent);
 
-	
+	boxCollisionDodge = CreateDefaultSubobject<UBoxComponent>(TEXT("boxCollisionDodge"));
+	boxCollisionDodge->SetupAttachment(RootComponent);
 	
 	projectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	//projectileMovement->SetupAttachment(RootComponent);
@@ -41,6 +45,8 @@ ABaseProjectile::ABaseProjectile()
 
 	//Setting life span of the projectile
 	//InitialLifeSpan = 3.0f;
+
+
 
 }
 
@@ -56,8 +62,20 @@ void ABaseProjectile::OnConstruction(const FTransform& Transform) {
 void ABaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	sphereCollision->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
-	sphereCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
+	sphereCollisionDamage->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
+	sphereCollisionDamage->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
+	sphereCollisionDamage->OnComponentEndOverlap.AddDynamic(this, &ABaseProjectile::EndOverlap);
+	boxCollisionDodge->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlapBoxDodge);
+	
+}
+
+void ABaseProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorldTimerManager().ClearTimer(ProjectileTimerHandle);
+	
+
+
 	
 }
 
@@ -96,14 +114,18 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		}
 
 
-		sphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+		sphereCollisionDamage->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		boxCollisionDodge->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		//Set flipbook and destroy, may need set scale
 		projectileFlipbookComponent->SetWorldScale3D(destroyScale);
 		projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
 
 		//Destroy after destroyFlipbook finishes playing
-		FTimerHandle ProjectileTimerHandle;
+
+		if (isAdded) {
+			Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0))->removeAttack(curAttackInfo);
+		}
+	
 		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
 			{
 				Destroy();
@@ -118,39 +140,89 @@ void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 {
 	if (!isEnemyProjectile) return;
 
-	AActor* MyOwner = GetOwner();
-	if (MyOwner == nullptr) {
-		Destroy();
-		return;
+	else if (OtherActor->ActorHasTag("BulletTimeAura") && isEnemyProjectile) {
+		//UE_LOG(LogTemp, Display, TEXT("SlowTime"));
+		ABulletTimeAura* myBulletTimeAura = Cast<ABulletTimeAura>(OtherActor);
+		if (myBulletTimeAura) {
+			this->CustomTimeDilation = myBulletTimeAura->getSlowDownRate();
+		}
+		
 	}
-
-
-	UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
-
-	//Apply Damage
-	auto MyOwnerInstigator = MyOwner->GetInstigatorController();
-	auto DamageTypeClass = UDamageType::StaticClass();
-
-	if (OtherActor && OtherActor != MyOwner && !OtherActor->ActorHasTag("Projectile")) {
-		UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
-	}
-
-	sphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	projectileMovement->StopMovementImmediately();
-
-	//Set flipbook and destroy, may need set scale
-	projectileFlipbookComponent->SetWorldScale3D(destroyScale);
-	projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
-
-	//Destroy after destroyFlipbook finishes playing
-	FTimerHandle ProjectileTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
-		{
+	else {
+	
+		AActor* MyOwner = GetOwner();
+		if (MyOwner == nullptr) {
 			Destroy();
-		}, projectileFlipbookComponent->GetFlipbookLength() * 0.9, false);
-	//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
+			return;
+		}
 
 
+		UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
+
+		//Apply Damage
+		auto MyOwnerInstigator = MyOwner->GetInstigatorController();
+		auto DamageTypeClass = UDamageType::StaticClass();
+
+		if (OtherActor && OtherActor != MyOwner && !OtherActor->ActorHasTag("Projectile")) {
+			UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
+		}
+
+		sphereCollisionDamage->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		boxCollisionDodge->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		projectileMovement->StopMovementImmediately();
+
+		//Set flipbook and destroy, may need set scale
+		projectileFlipbookComponent->SetWorldScale3D(destroyScale);
+		projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
+
+		//Destroy after destroyFlipbook finishes playing
+
+		if (isAdded) {
+			Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0))->removeAttack(curAttackInfo);
+		}
+		
+		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
+			{
+				Destroy();
+			}, projectileFlipbookComponent->GetFlipbookLength() * 0.9, false);
+		//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
+	
+	}
+
+
+
+	
+
+
+
+}
+
+void ABaseProjectile::EndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	//UE_LOG(LogTemp, Display, TEXT("End Overlap"));
+	if (OtherActor->ActorHasTag("BulletTimeAura") && isEnemyProjectile) {
+		//UE_LOG(LogTemp, Display, TEXT("SlowTime"));
+		this->CustomTimeDilation = 1;
+	}
+}
+
+void ABaseProjectile::BeginOverlapBoxDodge(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (isEnemyProjectile && OtherActor->ActorHasTag("Player")) {
+
+		UE_LOG(LogTemp, Display, TEXT("BeginOverlapBoxDodge"));
+
+		ADoomCharacter* playerRef = Cast<ADoomCharacter>(OtherActor);
+
+		
+		curAttackInfo.StartTime = GetWorld()->GetTimeSeconds();
+		curAttackInfo.Duration = attackDuration;
+		curAttackInfo.Attacker = this;
+
+		playerRef->addAttack(curAttackInfo);
+		isAdded = true;
+
+	}
 
 }
 

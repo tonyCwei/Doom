@@ -8,6 +8,13 @@
 #include "PaperFlipbookComponent.h"
 #include "PaperFlipbook.h"
 
+void ABFG::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorldTimerManager().ClearTimer(BFGFireHandle);
+	GetWorldTimerManager().ClearTimer(BFGTimerHandle);
+}
+
 void ABFG::FireWeapon() {
     if (playerCharacter->getCell() < 30) return;
 
@@ -16,7 +23,7 @@ void ABFG::FireWeapon() {
         //Fire projectile after fire animation finishes
         PlayFireAnimation();
 
-        FTimerHandle BFGFireHandle;
+        
 	    GetWorld()->GetTimerManager().SetTimer(BFGFireHandle, [&]()
 	    {
 	    ShootProjectle();
@@ -25,7 +32,7 @@ void ABFG::FireWeapon() {
         
 
         //control fire rate
-        FTimerHandle BFGTimerHandle;
+        
 	    GetWorld()->GetTimerManager().SetTimer(BFGTimerHandle, [&]()
 	    {
 	    bFireOnce = true;

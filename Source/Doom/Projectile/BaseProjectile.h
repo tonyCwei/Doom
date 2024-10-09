@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Doom/DoomCharacter.h"
 #include "BaseProjectile.generated.h"
+
+
 
 
 UCLASS()
@@ -23,9 +26,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+private:
+	FTimerHandle ProjectileTimerHandle;
+
+	
 
 protected:
 
@@ -34,7 +44,10 @@ protected:
 	class UArrowComponent* ArrowComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* sphereCollision;
+	class UBoxComponent* boxCollisionDodge;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	class USphereComponent* sphereCollisionDamage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UProjectileMovementComponent* projectileMovement;
@@ -49,6 +62,13 @@ protected:
 	FVector destroyScale;
 
 private:
+
+	FAttackInfo curAttackInfo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float attackDuration = 0.5;
+
+	bool isAdded = false;
 	
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -65,6 +85,16 @@ private:
 					  bool bFromSweep,
 					  const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void EndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void BeginOverlapBoxDodge(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 	
 
 public:

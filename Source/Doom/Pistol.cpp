@@ -3,6 +3,12 @@
 
 #include "Pistol.h"
 
+void APistol::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    GetWorldTimerManager().ClearTimer(PistolTimerHandle);
+}
+
 void APistol::FireWeapon() {
     if (bFireOnce) {
         bFireOnce = false;
@@ -10,7 +16,7 @@ void APistol::FireWeapon() {
         resetFlipbook();
 
         //control fire rate
-        FTimerHandle PistolTimerHandle;
+        
         GetWorld()->GetTimerManager().SetTimer(PistolTimerHandle, [&]()
         {
                 bFireOnce = true;

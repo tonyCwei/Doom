@@ -47,6 +47,12 @@ void ABaseWeapon::BeginPlay()
 	
 }
 
+void ABaseWeapon::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorldTimerManager().ClearTimer(resetFlipbookTimerHandle);
+}
+
 // Called every frame
 void ABaseWeapon::Tick(float DeltaTime)
 {
@@ -146,7 +152,7 @@ void ABaseWeapon::PlayFireAnimation() {
 }
 
 void ABaseWeapon::resetFlipbook() {
-	FTimerHandle resetFlipbookTimerHandle;
+	
 	GetWorld()->GetTimerManager().SetTimer(resetFlipbookTimerHandle, [&]()
 	{
 	   WeaponFlipBookComponent->SetFlipbook(IdleFlipbook);	   

@@ -17,6 +17,8 @@ class DOOM_API AMinigun : public ABaseWeapon
 private:
 	FTimerHandle minigunEvent;
 
+protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 public:
 

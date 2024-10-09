@@ -12,6 +12,12 @@
 #include "Enemies/BaseEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+void AFist::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    GetWorldTimerManager().ClearTimer(MeleeTimerHandle);
+}
+
 void AFist::FireWeapon() {
    //Super::FireWeapon();
    Punch();
@@ -69,7 +75,7 @@ void AFist::FireWeapon() {
 
      PlayFireAnimation();
 
-     FTimerHandle MeleeTimerHandle;
+   
  	GetWorld()->GetTimerManager().SetTimer(MeleeTimerHandle, [&]()
  	{
  	    WeaponFlipBookComponent->SetFlipbook(IdleFlipbook);	   

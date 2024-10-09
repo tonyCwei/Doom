@@ -14,6 +14,13 @@ class DOOM_API AFist : public ABaseWeapon
 {
 	GENERATED_BODY()
 
+
+private:
+	FTimerHandle MeleeTimerHandle;
+
+protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:
 
 	void FireWeapon() override;

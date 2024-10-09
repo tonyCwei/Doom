@@ -18,6 +18,11 @@ private:
 	
 	bool bFireOnce = true;
 
+	FTimerHandle PistolTimerHandle;
+
+protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:
 
 	void FireWeapon() override;
