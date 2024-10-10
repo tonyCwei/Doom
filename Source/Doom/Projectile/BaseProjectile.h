@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Doom/DoomCharacter.h"
+#include "Doom/GameState/DoomGameStateBase.h"
+
+
+
 #include "BaseProjectile.generated.h"
+
+
 
 
 
@@ -38,6 +43,8 @@ private:
 	
 
 protected:
+
+	ADoomGameStateBase* gameStateRef;
 
 	//Components Setup
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

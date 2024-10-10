@@ -19,24 +19,7 @@ class UTimelineComponent;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 
-USTRUCT(BlueprintType)
-struct FAttackInfo
-{
-	GENERATED_BODY()
 
-	float StartTime;
-
-	float Duration;
-
-	AActor* Attacker;
-
-	bool operator==(const FAttackInfo& Other) const
-	{
-		return (StartTime == Other.StartTime &&
-			Duration == Other.Duration &&
-			Attacker == Other.Attacker);
-	}
-};
 
 UCLASS(config=Game)
 class ADoomCharacter : public ACharacter
@@ -110,6 +93,12 @@ public:
 	//USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+//Game State Ref
+protected:
+	class ADoomGameStateBase* gameStateRef;
+
+
 
 private:
 	//Weapon
@@ -301,7 +290,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashAction;
 
-	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ABulletTimeAura> myBulletTimeAura;
@@ -315,8 +303,7 @@ private:
 	UFUNCTION()
 	void Dash(const FInputActionValue& Value);
 
-	//perfect dodges
-	TArray<FAttackInfo> activeAttacks;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
 	float perfectDodgeWindow = 0.5;
@@ -333,14 +320,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void perfectDodge();
 
-	UFUNCTION(BlueprintCallable)
-	void addAttack(FAttackInfo curAttackInfo);
-
-	UFUNCTION(BlueprintCallable)
-	void removeAttack(FAttackInfo curAttackInfo);
-
-	UFUNCTION(BlueprintCallable)
-	int getActiveAttacksSize() { return activeAttacks.Num(); }
 
 
 

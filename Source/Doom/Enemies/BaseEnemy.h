@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Doom/GameState/DoomGameStateBase.h"
 #include "BaseEnemy.generated.h"
 
 
@@ -11,6 +12,7 @@ UENUM(BlueprintType)
 enum EnemyState {
 	IdleState UMETA(DisplayName = "Idle"),
 	MovingState UMETA(DisplayName = "Moving"),
+	PreMeleeAttackState UMETA(DisplayName = "PreMeleeAttacking"),
 	MeleeAttackState UMETA(DisplayName = "MeleeAttacking"),
 	RangedAttackState UMETA(DisplayName = "RangedAttacking")
 };
@@ -18,6 +20,7 @@ enum EnemyState {
 
 UENUM(BlueprintType)
 enum AttackingState {
+	PreMeleeAttacking UMETA(DisplayName = "PreMeleeAttackState"),
 	MeleeAttacking UMETA(DisplayName = "MeleeAttackState"),
 	RangedAttacking UMETA(DisplayName = "RangedAttackState")
 };
@@ -37,6 +40,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -51,8 +56,16 @@ protected:
 	//Player Reference
 	class ADoomCharacter* playerCharacter;
 
+	ADoomGameStateBase* gameStateRef;
 
 	bool canSeePlayer = false;
+
+	//TimerHandles
+	FTimerHandle attackingTimerHandle;
+
+	FTimerHandle deathTimerHandle;
+
+	FTimerHandle attackWindowTimerHandle;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -90,6 +103,9 @@ protected:
 	TArray<class UPaperFlipbook*> meleeAttackFlipbooks;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
+	TArray<class UPaperFlipbook*> preMeleeAttackFlipbooks;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
 	TArray<class UPaperFlipbook*> rangedAttackFlipbooks;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
@@ -99,7 +115,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void CheckEnemyState();
 
-	FTimerHandle attackingTimerHandle;
+	
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
@@ -135,7 +151,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float meleeDamage = 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float meleeAttackWindow = 0.5;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float meleeAttackRange = 150;
+
+	FAttackInfo curAttackInfo;
+
+	bool isAdded;
 
 public:
 

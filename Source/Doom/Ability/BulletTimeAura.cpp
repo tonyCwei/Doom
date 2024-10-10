@@ -4,6 +4,9 @@
 #include "BulletTimeAura.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h" 
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ABulletTimeAura::ABulletTimeAura()
@@ -23,9 +26,11 @@ ABulletTimeAura::ABulletTimeAura()
 void ABulletTimeAura::BeginPlay()
 {
 	Super::BeginPlay();
+	UGameplayStatics::PlaySound2D(this, slowTimeStart);
 	
 	GetWorld()->GetTimerManager().SetTimer(destroyHandle, [&]()
 		{
+			UGameplayStatics::PlaySound2D(this, slowTimeEnd);
 			Destroy();
 		}, duration, false);
 

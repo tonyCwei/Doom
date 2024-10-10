@@ -35,10 +35,20 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	playerCharacter = Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	gameStateRef = GetWorld()->GetGameState<ADoomGameStateBase>();
+
 	currentFlipbooks = directionalFlipbooks;
 
 	OnTakeAnyDamage.AddDynamic(this, &ABaseEnemy::DamageTaken);
 	
+}
+
+void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorldTimerManager().ClearTimer(attackingTimerHandle);
+	GetWorldTimerManager().ClearTimer(deathTimerHandle);
+	GetWorldTimerManager().ClearTimer(attackWindowTimerHandle);
 }
 
 // Called every frame
@@ -47,12 +57,13 @@ void ABaseEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	CheckEnemyState();
 
-	if (canSeePlayer && !isDead) {
+	/*if (canSeePlayer && !isDead) {
 		rotateToPlayer(DeltaTime);
-	}
+	}*/
 
 	if (isDead) {
 		HandleDeath();
+		rotateToPlayer(DeltaTime);
 	}
 	else {
 		updateDirectionalSprite();
@@ -156,6 +167,10 @@ void ABaseEnemy::updateFlipbook(float degree, int32 index)
 		currentFlipbooks = movingFlipbooks;
 		break;
 
+	case PreMeleeAttackState:
+		currentFlipbooks = preMeleeAttackFlipbooks;
+		break;
+
 	case MeleeAttackState:
 		currentFlipbooks = meleeAttackFlipbooks;
 		break;
@@ -191,6 +206,10 @@ void ABaseEnemy::CheckEnemyState()
 	if (GetVelocity().Size() > 0) {
 		if (isAttacking) {
 			switch (attackingstate) {
+				case PreMeleeAttacking:
+					enemyState = PreMeleeAttackState;
+					break;
+
 				case MeleeAttacking:
 					enemyState = MeleeAttackState;
 					break;
@@ -207,6 +226,10 @@ void ABaseEnemy::CheckEnemyState()
 	else {
 		if (isAttacking) {
 			switch (attackingstate) {
+			case PreMeleeAttacking:
+				enemyState = PreMeleeAttackState;
+				break;
+
 			case MeleeAttacking:
 				enemyState = MeleeAttackState;
 				break;
@@ -259,45 +282,68 @@ void ABaseEnemy::ShootProjectle()
 void ABaseEnemy::MeleeAttack()
 {
 	isAttacking = true;
-	attackingstate = MeleeAttacking;
+	attackingstate = PreMeleeAttacking;
 
-	FVector lineTraceLocation = this->GetActorLocation();
-	FVector lineTraceForward = this->GetActorForwardVector();
-	FVector lineTraceEnd = lineTraceForward * 150 + lineTraceLocation;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_Pawn) };
+	float Distance = FVector::Dist(this->GetActorLocation(), playerCharacter->GetActorLocation());
+	if (Distance <= meleeAttackRange) {
+		curAttackInfo.StartTime = GetWorld()->GetTimeSeconds();
+		curAttackInfo.Duration = meleeAttackWindow;
+		curAttackInfo.Attacker = this;
 
-	TArray<AActor*> ActorsToIgnore = { Cast<AActor>(this) };
-	FHitResult HitResult;
-
-	//Line Trace
-	bool hasHit = UKismetSystemLibrary::LineTraceSingleForObjects(this->GetWorld(),
-		lineTraceLocation,
-		lineTraceEnd,
-		ObjectTypes,
-		false,
-		ActorsToIgnore,
-		EDrawDebugTrace::Type::ForDuration,
-		HitResult,
-		true);
-
-	//Apply DMG
-	if (hasHit) {
-		AActor* HitActor = HitResult.GetActor();
-
-		if (HitActor == UGameplayStatics::GetPlayerCharacter(this, 0)) {
-			//AActor* myOwner = GetOwner();
-			AController* MyOwnerInstigator = GetInstigatorController();
-			auto DamageTypeClass = UDamageType::StaticClass();
-			UGameplayStatics::ApplyDamage(HitActor, meleeDamage, MyOwnerInstigator, this, DamageTypeClass);
-		}
+		gameStateRef->addAttack(curAttackInfo);
+		isAdded = true;
 	}
 
-	GetWorld()->GetTimerManager().ClearTimer(attackingTimerHandle);
-	GetWorld()->GetTimerManager().SetTimer(attackingTimerHandle, [&]()
-		{
-			isAttacking = false;
+	//give a attack window delay for perfect dodge
+	GetWorld()->GetTimerManager().SetTimer(attackWindowTimerHandle, [&]()
+	{
+			
+			attackingstate = MeleeAttacking;
 
-		}, 0.5, false);
+			FVector lineTraceLocation = this->GetActorLocation();
+			FVector lineTraceForward = this->GetActorForwardVector();
+			FVector lineTraceEnd = lineTraceForward * meleeAttackRange + lineTraceLocation;
+			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_Pawn) };
+
+			TArray<AActor*> ActorsToIgnore = { Cast<AActor>(this) };
+			FHitResult HitResult;
+
+			//Line Trace
+			bool hasHit = UKismetSystemLibrary::LineTraceSingleForObjects(this->GetWorld(),
+				lineTraceLocation,
+				lineTraceEnd,
+				ObjectTypes,
+				false,
+				ActorsToIgnore,
+				EDrawDebugTrace::Type::ForDuration,
+				HitResult,
+				true);
+
+			//Apply DMG
+			if (hasHit) {
+				AActor* HitActor = HitResult.GetActor();
+
+				if (HitActor == UGameplayStatics::GetPlayerCharacter(this, 0)) {
+					//AActor* myOwner = GetOwner();
+					AController* MyOwnerInstigator = GetInstigatorController();
+					auto DamageTypeClass = UDamageType::StaticClass();
+					UGameplayStatics::ApplyDamage(HitActor, meleeDamage, MyOwnerInstigator, this, DamageTypeClass);
+				}
+			}
+
+			GetWorld()->GetTimerManager().ClearTimer(attackingTimerHandle);
+			GetWorld()->GetTimerManager().SetTimer(attackingTimerHandle, [&]()
+				{
+					isAttacking = false;
+					if (isAdded) gameStateRef->removeAttack(curAttackInfo);
+
+				}, 0.5, false);
+
+	}, meleeAttackWindow, false);
+
+
+
+	
 
 	
 }
@@ -351,7 +397,7 @@ void ABaseEnemy::HandleDeath() {
 	EnemyFlipBookComponent->SetFlipbook(deathFlipbook);
 	EnemyFlipBookComponent->SetLooping(false);
 	
-	FTimerHandle deathTimerHandle;
+	
 	GetWorld()->GetTimerManager().SetTimer(deathTimerHandle, [&]()
 		{
 			Destroy();

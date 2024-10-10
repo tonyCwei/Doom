@@ -17,6 +17,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Ability/BulletTimeAura.h"
+#include "Doom/GameState/DoomGameStateBase.h"
 
 
 
@@ -77,6 +78,9 @@ void ADoomCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	//Game State Ref
+	gameStateRef = GetWorld()->GetGameState<ADoomGameStateBase>();
 
 
 
@@ -458,7 +462,7 @@ void ADoomCharacter::Dash(const FInputActionValue& Value)
 
 void ADoomCharacter::checkPerfectDodge()
 {
-	for (FAttackInfo attackInfo : activeAttacks) {
+	for (FAttackInfo& attackInfo : gameStateRef->getActiveAttacks()) {
 		
 		float timeTillHit = attackInfo.StartTime + attackInfo.Duration - GetWorld()->GetTimeSeconds();
 
@@ -489,15 +493,6 @@ void ADoomCharacter::perfectDodge()
 		
 }
 
-void ADoomCharacter::addAttack(FAttackInfo curAttackInfo)
-{
-	activeAttacks.Add(curAttackInfo);
-}
-
-void ADoomCharacter::removeAttack(FAttackInfo curAttackInfo)
-{
-	activeAttacks.Remove(curAttackInfo);
-}
 
 
 //Weapon Bob

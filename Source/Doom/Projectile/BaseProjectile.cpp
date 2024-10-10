@@ -62,6 +62,10 @@ void ABaseProjectile::OnConstruction(const FTransform& Transform) {
 void ABaseProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	//Game State Ref
+	gameStateRef = GetWorld()->GetGameState<ADoomGameStateBase>();
+
 	sphereCollisionDamage->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
 	sphereCollisionDamage->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
 	sphereCollisionDamage->OnComponentEndOverlap.AddDynamic(this, &ABaseProjectile::EndOverlap);
@@ -96,7 +100,7 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		}
 
 
-		UE_LOG(LogTemp, Display, TEXT("On hit"));
+		//UE_LOG(LogTemp, Display, TEXT("On hit"));
 
 
 		//Apply Damage
@@ -123,7 +127,7 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		//Destroy after destroyFlipbook finishes playing
 
 		if (isAdded) {
-			Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0))->removeAttack(curAttackInfo);
+			gameStateRef->removeAttack(curAttackInfo);
 		}
 	
 		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
@@ -157,7 +161,7 @@ void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		}
 
 
-		UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
+		//UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
 
 		//Apply Damage
 		auto MyOwnerInstigator = MyOwner->GetInstigatorController();
@@ -178,7 +182,7 @@ void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		//Destroy after destroyFlipbook finishes playing
 
 		if (isAdded) {
-			Cast<ADoomCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0))->removeAttack(curAttackInfo);
+			gameStateRef->removeAttack(curAttackInfo);
 		}
 		
 		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
@@ -212,14 +216,12 @@ void ABaseProjectile::BeginOverlapBoxDodge(UPrimitiveComponent* OverlappedCompon
 
 		UE_LOG(LogTemp, Display, TEXT("BeginOverlapBoxDodge"));
 
-		ADoomCharacter* playerRef = Cast<ADoomCharacter>(OtherActor);
-
 		
 		curAttackInfo.StartTime = GetWorld()->GetTimeSeconds();
 		curAttackInfo.Duration = attackDuration;
 		curAttackInfo.Attacker = this;
 
-		playerRef->addAttack(curAttackInfo);
+		gameStateRef->addAttack(curAttackInfo);
 		isAdded = true;
 
 	}
