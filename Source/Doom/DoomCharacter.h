@@ -246,6 +246,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void setCanMelee(bool newVal)  {canMelee = newVal;}
 
+
+
+
 	//Weapon Pickup
 	UFUNCTION()
 	void pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass);
@@ -470,6 +473,16 @@ public:
 	void setMaxShield(float maxShield_) { maxShield = maxShield_; }
 
 
+	//Item Pickup
+public:
+	UFUNCTION(BlueprintCallable)
+	void pickupShield(float shieldAmount);
+
+	UFUNCTION(BlueprintCallable)
+	void pickupHealth(float HealthAmount);
+
+	UFUNCTION(BlueprintCallable)
+	void pickupAmmo(int32 ammoIndex, int32 amount);
 	
 
 };

@@ -339,7 +339,7 @@ void ADoomCharacter::pickupWeapon(TSubclassOf<ABaseWeapon> WeaponClass) {
 	//mainWeapon = Cast<ABaseWeapon>(WeaponChildActorComponent->GetChildActor());
 	//UpdateCurAmmoText();
 
-	//Play swap animation
+	//Swap to Picked up weapon
 	WeaponSwap(AllWeapons.Num()-1);
 
 
@@ -677,6 +677,80 @@ void ADoomCharacter::DamageTaken(AActor* DamagedActor, float Damage, const UDama
 void ADoomCharacter::HandleDeath()
 {
 
+}
+
+void ADoomCharacter::pickupShield(float shieldAmount)
+{
+	curShield += shieldAmount;
+	if (curShield >= maxShield) curShield = maxShield;
+
+	playerHUD->UpdateCurrentShield();
+}
+
+void ADoomCharacter::pickupHealth(float healthAmount)
+{
+	curHealth += healthAmount;
+	if (curHealth >= maxHealth) curHealth = maxHealth;
+
+	playerHUD->UpdateCurrentHealth();
+}
+
+void ADoomCharacter::pickupAmmo(int32 ammoIndex, int32 ammoAmount)
+{
+	switch (ammoIndex)
+	{	
+		case 1:
+			bullet += ammoAmount;
+			if (bullet >= maxBullet) bullet = maxBullet;
+
+			if (mainWeapon->GetAmmoType() == Bullet) {
+				playerHUD->UpdateBullet();
+			}
+			else {
+				playerHUD->UpdateBulletRight();
+			}
+			break;
+		
+		case 2:
+			shell += ammoAmount;
+			if (shell >= maxShell) shell = maxShell;
+
+			if (mainWeapon->GetAmmoType() == Shell) {
+				playerHUD->UpdateShell();
+			}
+			else {
+				playerHUD->UpdateShellRight();
+			}
+			break;
+
+		case 3:
+			rocket += ammoAmount;
+			if (rocket >= maxRocket) rocket = maxRocket;
+
+			if (mainWeapon->GetAmmoType() == Rocket) {
+				playerHUD->UpdateRocket();
+			}
+			else {
+				playerHUD->UpdateRocketRight();
+			}
+			break;
+		
+		
+		case 4:
+			cell += ammoAmount;
+			if (cell >= maxCell) cell = maxCell;
+
+			if (mainWeapon->GetAmmoType() == Cell) {
+				playerHUD->UpdateCell();
+			}
+			else {
+				playerHUD->UpdateCellRight();
+			}
+			break;
+		
+		default:
+			break;
+	}
 }
 
 

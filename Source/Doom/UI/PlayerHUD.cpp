@@ -53,9 +53,19 @@ void UPlayerHUD::UpdateBullet() {
     CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getBullet()));
 }
 
+void UPlayerHUD::UpdateBulletRight()
+{
+    bulletNo->SetText(FText::AsNumber(playerCharacter->getBullet()));
+}
+
 void UPlayerHUD::UpdateShell() {
     shellNo->SetText(FText::AsNumber(playerCharacter->getShell()));
     CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getShell()));
+}
+
+void UPlayerHUD::UpdateShellRight()
+{
+    shellNo->SetText(FText::AsNumber(playerCharacter->getShell()));
 }
 
 void UPlayerHUD::UpdateRocket() {
@@ -63,9 +73,19 @@ void UPlayerHUD::UpdateRocket() {
     CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getRocket()));
 }
 
+void UPlayerHUD::UpdateRocketRight()
+{
+    rocketNo->SetText(FText::AsNumber(playerCharacter->getRocket()));
+}
+
 void UPlayerHUD::UpdateCell() {
     cellNo->SetText(FText::AsNumber(playerCharacter->getCell()));
     CurrentAmmo->SetText(FText::AsNumber(playerCharacter->getCell()));
+}
+
+void UPlayerHUD::UpdateCellRight()
+{
+    cellNo->SetText(FText::AsNumber(playerCharacter->getCell()));
 }
 
 void UPlayerHUD::UpdateChainsaw()

@@ -70,11 +70,19 @@ public:
 
 	void UpdateBullet();
 
+	void UpdateBulletRight();
+
 	void UpdateShell();
+
+	void UpdateShellRight();
 
 	void UpdateRocket();
 
+	void UpdateRocketRight();
+
 	void UpdateCell();
+
+	void UpdateCellRight();
 
 	void UpdateChainsaw();
 

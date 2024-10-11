@@ -196,7 +196,9 @@ void ABaseEnemy::rotateToPlayer(float DeltaTime)
 
 	FRotator NewRotation = FMath::RInterpConstantTo(this->GetActorRotation(), TargetRotation, DeltaTime, rotationSpeed);
 
-	this->SetActorRotation(NewRotation);
+	//this->SetActorRotation(NewRotation);
+
+	this->SetActorRotation(FRotator(0, NewRotation.Yaw,0));
 
 
 }

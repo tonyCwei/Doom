@@ -3,6 +3,8 @@
 
 #include "WeaponPickup.h"
 #include "PaperSpriteComponent.h"
+#include "Components/SphereComponent.h"
+#include "BaseWeapon.h"
 #include "DoomCharacter.h"
 
 // Sets default values

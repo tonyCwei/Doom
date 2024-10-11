@@ -68,6 +68,8 @@ void ABaseProjectile::BeginPlay()
 
 	sphereCollisionDamage->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
 	sphereCollisionDamage->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
+	
+	//move to enemyprojectile
 	sphereCollisionDamage->OnComponentEndOverlap.AddDynamic(this, &ABaseProjectile::EndOverlap);
 	boxCollisionDodge->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlapBoxDodge);
 	
@@ -77,10 +79,6 @@ void ABaseProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	GetWorldTimerManager().ClearTimer(ProjectileTimerHandle);
-	
-
-
-	
 }
 
 // Called every frame
@@ -100,7 +98,7 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 		}
 
 
-		//UE_LOG(LogTemp, Display, TEXT("On hit"));
+		UE_LOG(LogTemp, Display, TEXT("On hit: %s"), *OtherActor->GetName());
 
 
 		//Apply Damage
@@ -142,9 +140,10 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 
 void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!isEnemyProjectile) return;
+	
+	//if (!isEnemyProjectile) return;
 
-	else if (OtherActor->ActorHasTag("BulletTimeAura") && isEnemyProjectile) {
+	if (OtherActor->ActorHasTag("BulletTimeAura") && isEnemyProjectile) {
 		//UE_LOG(LogTemp, Display, TEXT("SlowTime"));
 		ABulletTimeAura* myBulletTimeAura = Cast<ABulletTimeAura>(OtherActor);
 		if (myBulletTimeAura) {
@@ -161,7 +160,8 @@ void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 		}
 
 
-		//UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
+		UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
+
 
 		//Apply Damage
 		auto MyOwnerInstigator = MyOwner->GetInstigatorController();

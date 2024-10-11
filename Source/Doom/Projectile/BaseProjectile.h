@@ -37,12 +37,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
-	FTimerHandle ProjectileTimerHandle;
-
-	
 
 protected:
+	FTimerHandle ProjectileTimerHandle;
 
 	ADoomGameStateBase* gameStateRef;
 
@@ -50,8 +47,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UArrowComponent* ArrowComponent;
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* boxCollisionDodge;
+	class UBoxComponent* boxCollisionDodge;//move to enemyprojectile
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* sphereCollisionDamage;
@@ -68,33 +66,33 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Flipbooks", meta = (AllowPrivateAccess = "true"))
 	FVector destroyScale;
 
-private:
-
-	FAttackInfo curAttackInfo;
+	FAttackInfo curAttackInfo;//move to enemyprojectile
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	float attackDuration = 0.5;
+	float attackDuration = 0.5;//move to enemyprojectile
 
-	bool isAdded = false;
+	bool isAdded = false;//move to enemyprojectile
 	
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	bool isEnemyProjectile = false;
+	bool isEnemyProjectile = false; // no need
 
 	UFUNCTION()
-	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+	virtual void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 					  AActor* OtherActor,
 					  UPrimitiveComponent* OtherComp,
 					  int32 OtherBodyIndex,
 					  bool bFromSweep,
 					  const FHitResult& SweepResult);
 
+	//move to enemyprojectile
 	UFUNCTION()
 	void EndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	//move to enemyprojectile
 	UFUNCTION()
 	void BeginOverlapBoxDodge(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
