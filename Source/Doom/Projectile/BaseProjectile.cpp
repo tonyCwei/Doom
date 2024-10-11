@@ -10,7 +10,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
-#include "Doom/Ability/BulletTimeAura.h"
+
 
 
 
@@ -34,8 +34,6 @@ ABaseProjectile::ABaseProjectile()
 	projectileFlipbookComponent = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("ProjectileFlipBook"));
 	projectileFlipbookComponent->SetupAttachment(RootComponent);
 
-	boxCollisionDodge = CreateDefaultSubobject<UBoxComponent>(TEXT("boxCollisionDodge"));
-	boxCollisionDodge->SetupAttachment(RootComponent);
 	
 	projectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	//projectileMovement->SetupAttachment(RootComponent);
@@ -69,9 +67,7 @@ void ABaseProjectile::BeginPlay()
 	sphereCollisionDamage->OnComponentHit.AddDynamic(this, &ABaseProjectile::OnHit);
 	sphereCollisionDamage->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlap);
 	
-	//move to enemyprojectile
-	sphereCollisionDamage->OnComponentEndOverlap.AddDynamic(this, &ABaseProjectile::EndOverlap);
-	boxCollisionDodge->OnComponentBeginOverlap.AddDynamic(this, &ABaseProjectile::BeginOverlapBoxDodge);
+	
 	
 }
 
@@ -91,42 +87,32 @@ void ABaseProjectile::Tick(float DeltaTime)
 
 void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
 	
-		AActor* MyOwner = GetOwner();
-		if (MyOwner == nullptr) {
-			Destroy();
-			return;
-		}
+		//AActor* MyOwner = GetOwner();
+		//if (MyOwner == nullptr) {
+		//	Destroy();
+		//	return;
+		//}
 
 
 		UE_LOG(LogTemp, Display, TEXT("On hit: %s"), *OtherActor->GetName());
 
 
 		//Apply Damage
-		auto MyOwnerInstigator = MyOwner->GetInstigatorController();
+		auto MyInstigator = GetInstigatorController();
 		auto DamageTypeClass = UDamageType::StaticClass();
 
-		if (OtherActor && OtherActor != MyOwner && !OtherActor->ActorHasTag("Projectile")) {
-			if (MyOwner->ActorHasTag("enemy") && OtherActor->ActorHasTag("enemy")) {
-				UGameplayStatics::ApplyDamage(OtherActor, 1, MyOwnerInstigator, this, DamageTypeClass);
-			}
-			else {
-				UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
-			}
-
+		if (OtherActor && OtherActor != this && !OtherActor->ActorHasTag("Projectile")) {
+				UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyInstigator, this, DamageTypeClass);
 		}
 
 
 		sphereCollisionDamage->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		boxCollisionDodge->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		//Set flipbook and destroy, may need set scale
 		projectileFlipbookComponent->SetWorldScale3D(destroyScale);
 		projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
 
 		//Destroy after destroyFlipbook finishes playing
 
-		if (isAdded) {
-			gameStateRef->removeAttack(curAttackInfo);
-		}
 	
 		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
 			{
@@ -140,39 +126,19 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 
 void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	
-	//if (!isEnemyProjectile) return;
+	UE_LOG(LogTemp, Display, TEXT("On BeginOverlap: %s"), *OtherActor->GetName());
 
-	if (OtherActor->ActorHasTag("BulletTimeAura") && isEnemyProjectile) {
-		//UE_LOG(LogTemp, Display, TEXT("SlowTime"));
-		ABulletTimeAura* myBulletTimeAura = Cast<ABulletTimeAura>(OtherActor);
-		if (myBulletTimeAura) {
-			this->CustomTimeDilation = myBulletTimeAura->getSlowDownRate();
-		}
-		
-	}
-	else {
-	
-		AActor* MyOwner = GetOwner();
-		if (MyOwner == nullptr) {
-			Destroy();
-			return;
-		}
-
-
-		UE_LOG(LogTemp, Display, TEXT("On BeginOverlap"));
-
-
+	if (!OtherActor->ActorHasTag("Player")) {
 		//Apply Damage
-		auto MyOwnerInstigator = MyOwner->GetInstigatorController();
+		auto MyInstigator = GetInstigatorController();
 		auto DamageTypeClass = UDamageType::StaticClass();
 
-		if (OtherActor && OtherActor != MyOwner && !OtherActor->ActorHasTag("Projectile")) {
-			UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyOwnerInstigator, this, DamageTypeClass);
+		if (OtherActor && OtherActor != this && !OtherActor->ActorHasTag("Projectile")) {
+			UGameplayStatics::ApplyDamage(OtherActor, projectileDamage, MyInstigator, this, DamageTypeClass);
 		}
 
 		sphereCollisionDamage->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		boxCollisionDodge->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		projectileMovement->StopMovementImmediately();
 
 		//Set flipbook and destroy, may need set scale
@@ -181,52 +147,24 @@ void ABaseProjectile::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 
 		//Destroy after destroyFlipbook finishes playing
 
-		if (isAdded) {
-			gameStateRef->removeAttack(curAttackInfo);
-		}
-		
 		GetWorld()->GetTimerManager().SetTimer(ProjectileTimerHandle, [&]()
 			{
 				Destroy();
 			}, projectileFlipbookComponent->GetFlipbookLength() * 0.9, false);
 		//multiplied 0.9 for delay time in order to prevent flipbook from looping back to the first frame
-	
+
 	}
-
-
-
-	
-
-
-
-}
-
-void ABaseProjectile::EndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	//UE_LOG(LogTemp, Display, TEXT("End Overlap"));
-	if (OtherActor->ActorHasTag("BulletTimeAura") && isEnemyProjectile) {
-		//UE_LOG(LogTemp, Display, TEXT("SlowTime"));
-		this->CustomTimeDilation = 1;
-	}
-}
-
-void ABaseProjectile::BeginOverlapBoxDodge(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (isEnemyProjectile && OtherActor->ActorHasTag("Player")) {
-
-		UE_LOG(LogTemp, Display, TEXT("BeginOverlapBoxDodge"));
-
 		
-		curAttackInfo.StartTime = GetWorld()->GetTimeSeconds();
-		curAttackInfo.Duration = attackDuration;
-		curAttackInfo.Attacker = this;
-
-		gameStateRef->addAttack(curAttackInfo);
-		isAdded = true;
-
+	
 	}
 
-}
+
+
+	
+
+
+
+
 
 
 

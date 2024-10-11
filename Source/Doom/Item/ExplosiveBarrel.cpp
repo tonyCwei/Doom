@@ -105,7 +105,7 @@ void AExplosiveBarrel::DamageTaken(AActor* DamagedActor, float Damage, const UDa
 	if (hasHit) {
 		for (FHitResult hitResult : HitResults) {
 			AActor* HitActor = hitResult.GetActor();
-			AController* MyOwnerInstigator = GetInstigatorController();
+			AController* MyInstigator = GetInstigatorController();
 			auto DamageTypeClass = UDamageType::StaticClass();
 			
 			float actualDamage;
@@ -115,7 +115,7 @@ void AExplosiveBarrel::DamageTaken(AActor* DamagedActor, float Damage, const UDa
 			else {
 				actualDamage = enemyDamage;
 			}
-			UGameplayStatics::ApplyDamage(HitActor, actualDamage, MyOwnerInstigator, this, DamageTypeClass);
+			UGameplayStatics::ApplyDamage(HitActor, actualDamage, MyInstigator, this, DamageTypeClass);
 
 		}
 

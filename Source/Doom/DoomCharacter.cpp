@@ -466,7 +466,7 @@ void ADoomCharacter::checkPerfectDodge()
 		
 		float timeTillHit = attackInfo.StartTime + attackInfo.Duration - GetWorld()->GetTimeSeconds();
 
-		UE_LOG(LogTemp, Display, TEXT("%f"), timeTillHit);
+		UE_LOG(LogTemp, Display, TEXT("TimeTillHit: %f"), timeTillHit);
 		if (timeTillHit > 0 && timeTillHit <= perfectDodgeWindow) {
 			perfectDodge();
 		}
