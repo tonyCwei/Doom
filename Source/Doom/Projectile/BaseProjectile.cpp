@@ -107,9 +107,12 @@ void ABaseProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 
 
 		sphereCollisionDamage->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		projectileMovement->StopMovementImmediately();
+
 		//Set flipbook and destroy, may need set scale
 		projectileFlipbookComponent->SetWorldScale3D(destroyScale);
 		projectileFlipbookComponent->SetFlipbook(destroyFlipbook);
+
 
 		//Destroy after destroyFlipbook finishes playing
 

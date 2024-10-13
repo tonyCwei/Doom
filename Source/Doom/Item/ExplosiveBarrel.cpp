@@ -68,10 +68,10 @@ void AExplosiveBarrel::DamageTaken(AActor* DamagedActor, float Damage, const UDa
 	float Distance = FVector::Dist(this->GetActorLocation(), playerCharacterRef->GetActorLocation());
 	
 	if (Distance <= explosionRadius) {
-		newRelativeLocation = FVector(relativeLocation.X + Distance - 250, relativeLocation.Y, relativeLocation.Z);
+		newRelativeLocation = FVector(relativeLocation.X + Distance - 250, relativeLocation.Y, relativeLocation.Z + 50);
 	}
 	else {
-		newRelativeLocation = FVector(relativeLocation.X + explosionRadius / 2, relativeLocation.Y, relativeLocation.Z);
+		newRelativeLocation = FVector(relativeLocation.X + explosionRadius / 2, relativeLocation.Y, relativeLocation.Z + 50);
 	}
 	
 

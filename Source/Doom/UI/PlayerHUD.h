@@ -64,6 +64,16 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* CurrentShield;
 
+	//KeyCards
+	UPROPERTY(meta = (BindWidget))
+	class UImage* RedKey;
+
+	UPROPERTY(meta = (BindWidget))
+	class UImage* OrangeKey;
+
+	UPROPERTY(meta = (BindWidget))
+	class UImage* BlueKey;
+
 public:
 
 	void InitlizePlayerHUD();
@@ -89,6 +99,14 @@ public:
 	void UpdateCurrentHealth();
 
 	void UpdateCurrentShield();
+
+	void ActiveRedKey() ;
+
+	void ActiveOrangeKey();
+
+	void ActiveBlueKey();
+
+	
 
 
 };

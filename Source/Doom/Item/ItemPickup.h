@@ -14,7 +14,10 @@ enum ItemType {
 	BulletAmmo UMETA(DisplayName = "BulletAmmo"),
 	ShellAmmo UMETA(DisplayName = "ShellAmmo"),
 	RocketAmmo UMETA(DisplayName = "RocketAmmo"),
-	CellAmmo UMETA(DisplayName = "CellAmmo")
+	CellAmmo UMETA(DisplayName = "CellAmmo"),
+	RedKeyCard UMETA(DisplayName = "RedKeyCard"),
+	OrangeKeyCard UMETA(DisplayName = "OrangeKeyCard"),
+	BlueKeyCard UMETA(DisplayName = "BlueKeyCard"),
 };
 
 

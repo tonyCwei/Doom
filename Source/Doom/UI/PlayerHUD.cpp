@@ -7,6 +7,8 @@
 #include "Components/TextBlock.h"
 #include "Components/ProgressBar.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/Image.h"
+
 
 
 void UPlayerHUD::NativeConstruct()
@@ -20,7 +22,7 @@ void UPlayerHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
     updateStaminaBar();
-    
+
 }
 
 void UPlayerHUD::updateStaminaBar()
@@ -101,6 +103,21 @@ void UPlayerHUD::UpdateCurrentHealth()
 void UPlayerHUD::UpdateCurrentShield()
 {
     CurrentShield->SetText(FText::AsNumber(playerCharacter->getCurShield()));
+}
+
+void UPlayerHUD::ActiveRedKey()
+{
+    RedKey->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UPlayerHUD::ActiveOrangeKey()
+{
+    OrangeKey->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UPlayerHUD::ActiveBlueKey()
+{
+    BlueKey->SetVisibility(ESlateVisibility::Visible);
 }
 
 

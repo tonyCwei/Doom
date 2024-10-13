@@ -48,15 +48,15 @@ void AWeaponPickup::RotateImage(float DeltaTime) {
 void AWeaponPickup::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult) {
 	//UE_LOG(LogTemp, Warning, TEXT("overlap event"));
 
-	ADoomCharacter* playerCharacter = Cast<ADoomCharacter>(OtherActor);
-
-	if (playerCharacter) {
-		if (WeaponClass) {
-			playerCharacter->pickupWeapon(WeaponClass);
-			Destroy();
+	if (OtherActor->ActorHasTag("Player")) {
+		ADoomCharacter* playerCharacter = Cast<ADoomCharacter>(OtherActor);
+		if (playerCharacter) {
+			if (WeaponClass) {
+				playerCharacter->pickupWeapon(WeaponClass);
+				Destroy();
+			}
 		}
-	} else {
-		UE_LOG(LogTemp, Warning, TEXT("cast failed"));
 	}
+	
 }
 

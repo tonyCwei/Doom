@@ -46,16 +46,16 @@ void AItemPickup::RotateImage(float DeltaTime)
 void AItemPickup::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
+	if (OtherActor->ActorHasTag("Player")) {
+		ADoomCharacter* playerCharacterRef = Cast<ADoomCharacter>(OtherActor);
 
-	ADoomCharacter* playerCharacterRef = Cast<ADoomCharacter>(OtherActor);
-
-	if (playerCharacterRef) {
-		switch (itemType)
-		{
-			case Shield: 
+		if (playerCharacterRef) {
+			switch (itemType)
+			{
+			case Shield:
 				playerCharacterRef->pickupShield(itemAmount);
 				break;
-			
+
 			case Health:
 				playerCharacterRef->pickupHealth(itemAmount);
 				break;
@@ -76,13 +76,27 @@ void AItemPickup::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 				playerCharacterRef->pickupAmmo(4, itemAmount);
 				break;
 
+			case RedKeyCard:
+				playerCharacterRef->pickupKey(1);
+				break;
+
+			case OrangeKeyCard:
+				playerCharacterRef->pickupKey(2);
+				break;
+
+			case BlueKeyCard:
+				playerCharacterRef->pickupKey(3);
+				break;
+
 			default:
 				break;
+			}
+
 		}
+
+		Destroy();
 	
 	}
-
-	Destroy();
 
 }
 

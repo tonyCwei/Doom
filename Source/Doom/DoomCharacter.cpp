@@ -18,6 +18,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Ability/BulletTimeAura.h"
 #include "Doom/GameState/DoomGameStateBase.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Prop/BaseDoor.h"
 
 
 
@@ -210,6 +212,9 @@ void ADoomCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		//Dash
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &ADoomCharacter::Dash);
+
+		//Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ADoomCharacter::Interact);
 		
 	}
 	else
@@ -751,6 +756,81 @@ void ADoomCharacter::pickupAmmo(int32 ammoIndex, int32 ammoAmount)
 		default:
 			break;
 	}
+}
+
+void ADoomCharacter::Interact(const FInputActionValue& Value)
+{
+	FVector lineTraceLocation = WeaponChildActorComponent->GetComponentLocation();
+	FVector lineTraceForward = UKismetMathLibrary::GetForwardVector(WeaponChildActorComponent->GetComponentRotation());
+	FVector lineTraceEnd = lineTraceForward * interactDistance + lineTraceLocation;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = { UEngineTypes::ConvertToObjectType(ECC_WorldStatic),
+														 UEngineTypes::ConvertToObjectType(ECC_WorldDynamic),
+														 UEngineTypes::ConvertToObjectType(ECC_Pawn) };
+
+	TArray<AActor*> ActorsToIgnore = { Cast<AActor>(this), UGameplayStatics::GetPlayerCharacter(this,0) };
+	FHitResult HitResult;
+
+	//Line Trace
+	bool hasHit = UKismetSystemLibrary::LineTraceSingleForObjects(this->GetWorld(),
+		lineTraceLocation,
+		lineTraceEnd,
+		ObjectTypes,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::Type::None,
+		HitResult,
+		true);
+
+	if (hasHit) {
+		AActor* HitActor = HitResult.GetActor();
+		if (HitActor->ActorHasTag("Door")) {
+			InteractDoor(HitActor);
+		}
+
+	}
+}
+
+void ADoomCharacter::InteractDoor(AActor* door)
+{
+	ABaseDoor* myDoor = Cast<ABaseDoor>(door);
+	if (myDoor) {
+		if (myDoor->getIsLocked()) {
+			myDoor->unlockDoor();
+	
+		}
+		else {
+			myDoor->openDoor();
+		}
+
+	}
+
+
+}
+
+void ADoomCharacter::pickupKey(int32 colorIndex)
+{
+	switch (colorIndex)
+	{
+	case 1:
+		Tags.Add(FName("RedKey"));
+		playerHUD->ActiveRedKey();
+		break;
+	
+	case 2:
+		Tags.Add(FName("OrangeKey"));
+		playerHUD->ActiveOrangeKey();
+		break;
+	
+	case 3:
+		Tags.Add(FName("BlueKey"));
+		playerHUD->ActiveBlueKey();
+		break;
+
+	default:
+		break;
+	}
+
+
 }
 
 

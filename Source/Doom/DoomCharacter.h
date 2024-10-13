@@ -53,6 +53,10 @@ class ADoomCharacter : public ACharacter
 	/** Melee Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MeleeAction;
+
+	/** Melee Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InteractAction;
 	
 public:
 	ADoomCharacter();
@@ -484,6 +488,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void pickupAmmo(int32 ammoIndex, int32 amount);
 	
+	//Interact Button
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Stats", meta = (AllowPrivateAccess = "true"))
+	float interactDistance = 100;
+
+
+	UFUNCTION(BlueprintCallable)
+	void Interact(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable)
+	void InteractDoor(AActor* door);
+
+	//KeyCard System
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void pickupKey(int32 colorIndex);
+
 
 };
 
